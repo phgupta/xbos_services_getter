@@ -1,0 +1,391 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Welcome to xbos-services-getter’s documentation! &#8212; xbos-services-getter 0.0.1dev documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-xbos-services-getter-s-documentation">
+<h1>Welcome to xbos-services-getter’s documentation!<a class="headerlink" href="#welcome-to-xbos-services-getter-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="intro">
+<h2>Intro<a class="headerlink" href="#intro" title="Permalink to this headline">¶</a></h2>
+<p>Allows for easy retrieval of data which is relevant to XBOS projects.</p>
+<p>A Ptyhon 3.5+ wrapper for the XBOS microservices.</p>
+</div>
+<div class="section" id="quick-setup">
+<h2>Quick Setup<a class="headerlink" href="#quick-setup" title="Permalink to this headline">¶</a></h2>
+<p>Using pip for Python 3.5+ run:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> pip install xbos-services-getter
+</pre></div>
+</div>
+</div>
+<div class="section" id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h2>
+<p>To start using the services, set the microservices host address. To get the addresses email me: daniel (dot) lengyel (at) berkeley (dot) edu</p>
+</div>
+<div class="section" id="working-microservices">
+<h2>Working microservices<a class="headerlink" href="#working-microservices" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt>Comfortband</dt>
+<dd>Gets the comfortband for a given building and HVAC zone in a timeframe (start, end) and window.</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Do Not Exceed</dt>
+<dd>Gets the do not exceed setpoints for a given building and HVAC zone in a timeframe (start, end) and window.</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Historic Occupancy</dt>
+<dd>Gets the historic occupancy for a given building and HVAC zone in a timeframe (start, end) and window.</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Price</dt>
+<dd>Gets the price for a given utility  in a timeframe (start, end) and window.</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Discomfort</dt>
+<dd>Calculates the discomfort of occupants given an indoor temperature and comfortband.</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>HVAC Consumption</dt>
+<dd>Gets the HVAC consumption for every possible action for a given building and HVAC zone.</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="module-xbos_services_getter.xbos_services_getter">
+<span id="functions"></span><h2>Functions<a class="headerlink" href="#module-xbos_services_getter.xbos_services_getter" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_actions_historic">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_actions_historic</code><span class="sig-paren">(</span><em>indoor_historic_stub</em>, <em>building</em>, <em>zone</em>, <em>start</em>, <em>end</em>, <em>window</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_actions_historic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets historic indoor temperature as pd.series.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>indoor_historic_stub</strong> – grpc stub for historic indoor temperature microservice</li>
+<li><strong>building</strong> – (str) building name</li>
+<li><strong>zone</strong> – (str) zone name</li>
+<li><strong>start</strong> – (datetime timezone aware)</li>
+<li><strong>end</strong> – (datetime timezone aware)</li>
+<li><strong>window</strong> – (str) the interval in which to split the data.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">pd.series valus=float, index=time</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_comfortband">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_comfortband</code><span class="sig-paren">(</span><em>temperature_band_stub</em>, <em>bldg</em>, <em>zone</em>, <em>start</em>, <em>end</em>, <em>window</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_comfortband" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets comfortband as pd.df.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>temperature_band_stub</strong> – grpc stub for temperature_band microservice</li>
+<li><strong>bldg</strong> – (str) building name</li>
+<li><strong>zone</strong> – (str) zone name</li>
+<li><strong>start</strong> – (datetime timezone aware) start of comfortband</li>
+<li><strong>end</strong> – (datetime timezone aware) end of comfortband</li>
+<li><strong>window</strong> – (str) the interval in which to split the comfortband.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">pd.df columns=[“t_low”, “t_high”], valus=float, index=time</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_discomfort">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_discomfort</code><span class="sig-paren">(</span><em>discomfort_stub</em>, <em>building</em>, <em>temperature</em>, <em>temperature_low</em>, <em>temperature_high</em>, <em>occupancy</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_discomfort" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_discomfort_stub">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_discomfort_stub</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_discomfort_stub" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_do_not_exceed">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_do_not_exceed</code><span class="sig-paren">(</span><em>temperature_band_stub</em>, <em>bldg</em>, <em>zone</em>, <em>start</em>, <em>end</em>, <em>window</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_do_not_exceed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets comfortband as pd.df.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>temperature_band_stub</strong> – grpc stub for temperature_band microservice</li>
+<li><strong>bldg</strong> – (str) building name</li>
+<li><strong>zone</strong> – (str) zone name</li>
+<li><strong>start</strong> – (datetime timezone aware) start of safetyband</li>
+<li><strong>end</strong> – (datetime timezone aware) end of safetyband</li>
+<li><strong>window</strong> – (str) the interval in which to split the safetyband.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">pd.df columns=[“t_low”, “t_high”], valus=float, index=time</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_hvac_consumption">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_hvac_consumption</code><span class="sig-paren">(</span><em>hvac_consumption_stub</em>, <em>building</em>, <em>zone</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_hvac_consumption" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_hvac_consumption_stub">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_hvac_consumption_stub</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_hvac_consumption_stub" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_indoor_historic_stub">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_indoor_historic_stub</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_indoor_historic_stub" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_indoor_temperature_historic">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_indoor_temperature_historic</code><span class="sig-paren">(</span><em>indoor_historic_stub</em>, <em>building</em>, <em>zone</em>, <em>start</em>, <em>end</em>, <em>window</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_indoor_temperature_historic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets historic indoor temperature as pd.series.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>indoor_historic_stub</strong> – grpc stub for historic indoor temperature microservice</li>
+<li><strong>building</strong> – (str) building name</li>
+<li><strong>zone</strong> – (str) zone name</li>
+<li><strong>start</strong> – (datetime timezone aware)</li>
+<li><strong>end</strong> – (datetime timezone aware)</li>
+<li><strong>window</strong> – (str) the interval in which to split the data.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">pd.series valus=float, index=time</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_indoor_temperature_prediction">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_indoor_temperature_prediction</code><span class="sig-paren">(</span><em>indoor_prediction_stub</em>, <em>building</em>, <em>zone</em>, <em>current_time</em>, <em>action</em>, <em>t_in</em>, <em>t_out</em>, <em>other_zone_temperatures</em>, <em>occupancy</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_indoor_temperature_prediction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets prediction of indoor temperature.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>indoor_prediction_stub</strong> – grpc stub for prediction of indoor temperature microservice</li>
+<li><strong>building</strong> – (str) building name</li>
+<li><strong>zone</strong> – (str) zone name</li>
+<li><strong>current_time</strong> – (datetime timezone aware)</li>
+<li><strong>action</strong> – (int) Action as given in utils file.</li>
+<li><strong>t_in</strong> – (float) current temperature inside of zone.</li>
+<li><strong>t_out</strong> – (float) currrent outdoor temperature.</li>
+<li><strong>other_zone_temperatures</strong> – {zone_i: indoor temperature of zone_i}</li>
+<li><strong>occupancy</strong> – (float) Indicator: Is the zone currently occupied.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">(float) temperature in 5 minutes after current_time in Fahrenheit.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_indoor_temperature_prediction_stub">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_indoor_temperature_prediction_stub</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_indoor_temperature_prediction_stub" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_occupancy">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_occupancy</code><span class="sig-paren">(</span><em>occupancy_stub</em>, <em>bldg</em>, <em>zone</em>, <em>start</em>, <em>end</em>, <em>window</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_occupancy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets occupancy as pd.series.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>occupancy_stub</strong> – grpc stub for occupancy microservice</li>
+<li><strong>bldg</strong> – (str) building name</li>
+<li><strong>zone</strong> – (str) zone name</li>
+<li><strong>start</strong> – (datetime timezone aware)</li>
+<li><strong>end</strong> – (datetime timezone aware)</li>
+<li><strong>window</strong> – (str) the interval in which to split the data.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">pd.series valus=float, index=time</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_occupancy_stub">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_occupancy_stub</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_occupancy_stub" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_outdoor_historic_stub">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_outdoor_historic_stub</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_outdoor_historic_stub" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_outdoor_temperature_historic">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_outdoor_temperature_historic</code><span class="sig-paren">(</span><em>outdoor_historic_stub</em>, <em>building</em>, <em>start</em>, <em>end</em>, <em>window</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_outdoor_temperature_historic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets historic outdoor temperature as pd.series.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>indoor_historic_stub</strong> – grpc stub for historic outdoor temperature microservice</li>
+<li><strong>building</strong> – (str) building name</li>
+<li><strong>zone</strong> – (str) zone name</li>
+<li><strong>start</strong> – (datetime timezone aware)</li>
+<li><strong>end</strong> – (datetime timezone aware)</li>
+<li><strong>window</strong> – (str) the interval in which to split the data.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">pd.series valus=float, index=time</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_temperature_band_stub">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_temperature_band_stub</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_temperature_band_stub" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="toctree-wrapper compound">
+</div>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">xbos-services-getter</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Daniel Lengyel.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
