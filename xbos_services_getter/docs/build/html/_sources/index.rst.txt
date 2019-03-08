@@ -19,6 +19,25 @@ Quick Start
 ^^^^^^^^^^^
 To start using the services, set the microservices host address. To get the addresses email me: daniel (dot) lengyel (at) berkeley (dot) edu
 
+Generally, to get data, instantiate the stub (client) for the service to be used. Then, call the data getter function with the required parameters.
+
+Example 1: Get a Comfortband
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: python
+    
+    import datetime
+    import pytz
+    import xbos_services_getter
+    
+    start = datetime.datetime(year=2018, month=1, day=1, hour=0, minute=0).replace(tzinfo=pytz.utc)
+    end = start + datetime.timedelta(days=7)
+    window = "15m"
+
+    temperature_band_stub = xbos_services_getter.get_temperature_band_stub()
+    comfortband = xbos_services_getter.get_comfortband(temperature_band_stub, iter_bldg, iter_zone, start, end, window)
+
+
 
 Working microservices
 ^^^^^^^^^^^^^^^^^^^^^

@@ -1,6 +1,23 @@
 import grpc
 
-from .lib import *
+from xbos_services_getter.lib import discomfort_pb2
+from xbos_services_getter.lib import discomfort_pb2_grpc
+from xbos_services_getter.lib import hvac_consumption_pb2
+from xbos_services_getter.lib import hvac_consumption_pb2_grpc
+from xbos_services_getter.lib import indoor_temperature_action_pb2
+from xbos_services_getter.lib import indoor_temperature_action_pb2_grpc
+from xbos_services_getter.lib import occupancy_pb2
+from xbos_services_getter.lib import occupancy_pb2_grpc
+from xbos_services_getter.lib import outdoor_temperature_historical_pb2
+from xbos_services_getter.lib import outdoor_temperature_historical_pb2_grpc
+from xbos_services_getter.lib import outdoor_temperature_prediction_pb2
+from xbos_services_getter.lib import outdoor_temperature_prediction_pb2_grpc
+from xbos_services_getter.lib import price_pb2
+from xbos_services_getter.lib import price_pb2_grpc
+from xbos_services_getter.lib import schedules_pb2
+from xbos_services_getter.lib import schedules_pb2_grpc
+from xbos_services_getter.lib import thermal_model_pb2
+from xbos_services_getter.lib import thermal_model_pb2_grpc
 
 import datetime
 import pytz
@@ -28,11 +45,11 @@ def get_temperature_band_stub():
     return temperature_band_stub
 
 
-def get_comfortband(temperature_band_stub, bldg, zone, start, end, window):
+def get_comfortband(temperature_band_stub, building, zone, start, end, window):
     """Gets comfortband as pd.df.
 
     :param temperature_band_stub: grpc stub for temperature_band microservice
-    :param bldg: (str) building name
+    :param building: (str) building name
     :param zone: (str) zone name
     :param start: (datetime timezone aware) start of comfortband
     :param end: (datetime timezone aware) end of comfortband
@@ -46,7 +63,7 @@ def get_comfortband(temperature_band_stub, bldg, zone, start, end, window):
 
     # call service
     comfortband_response = temperature_band_stub.GetComfortband(
-        schedules_pb2.Request(building=bldg, zone=zone, start=int(start_unix), end=int(end_unix), window=window,
+        schedules_pb2.Request(building=building, zone=zone, start=int(start_unix), end=int(end_unix), window=window,
                               unit="F"))
 
     # process data
@@ -61,11 +78,11 @@ def get_comfortband(temperature_band_stub, bldg, zone, start, end, window):
     return comfortband_final
 
 
-def get_do_not_exceed(temperature_band_stub, bldg, zone, start, end, window):
+def get_do_not_exceed(temperature_band_stub, building, zone, start, end, window):
     """Gets comfortband as pd.df.
 
     :param temperature_band_stub: grpc stub for temperature_band microservice
-    :param bldg: (str) building name
+    :param building: (str) building name
     :param zone: (str) zone name
     :param start: (datetime timezone aware) start of safetyband
     :param end: (datetime timezone aware) end of safetyband
@@ -79,7 +96,7 @@ def get_do_not_exceed(temperature_band_stub, bldg, zone, start, end, window):
 
     # call service
     do_not_exceed_response = temperature_band_stub.GetDoNotExceed(
-        schedules_pb2.Request(building=bldg, zone=zone, start=int(start_unix), end=int(end_unix), window=window,
+        schedules_pb2.Request(building=building, zone=zone, start=int(start_unix), end=int(end_unix), window=window,
                               unit="F"))
 
     # process data
@@ -100,11 +117,11 @@ def get_occupancy_stub():
     return occupancy_pb2_grpc.OccupancyStub(occupancy_channel)
 
 
-def get_occupancy(occupancy_stub, bldg, zone, start, end, window):
+def get_occupancy(occupancy_stub, building, zone, start, end, window):
     """Gets occupancy as pd.series.
 
     :param occupancy_stub: grpc stub for occupancy microservice
-    :param bldg: (str) building name
+    :param building: (str) building name
     :param zone: (str) zone name
     :param start: (datetime timezone aware)
     :param end: (datetime timezone aware)
@@ -119,7 +136,7 @@ def get_occupancy(occupancy_stub, bldg, zone, start, end, window):
 
     # call service
     occupancy_response = occupancy_stub.GetOccupancy(
-        occupancy_pb2.Request(building=bldg, zone=zone, start=int(start_unix), end=int(end_unix), window=window))
+        occupancy_pb2.Request(building=building, zone=zone, start=int(start_unix), end=int(end_unix), window=window))
 
     # process data
     occupancy_final = pd.Series(index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]

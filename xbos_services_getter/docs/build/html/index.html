@@ -49,6 +49,22 @@
 <div class="section" id="quick-start">
 <h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h2>
 <p>To start using the services, set the microservices host address. To get the addresses email me: daniel (dot) lengyel (at) berkeley (dot) edu</p>
+<p>Generally, to get data, instantiate the stub (client) for the service to be used. Then, call the data getter function with the required parameters.</p>
+</div>
+<div class="section" id="example-1-get-a-comfortband">
+<h2>Example 1: Get a Comfortband<a class="headerlink" href="#example-1-get-a-comfortband" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">pytz</span>
+<span class="kn">import</span> <span class="nn">xbos_services_getter</span>
+
+<span class="n">start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="n">year</span><span class="o">=</span><span class="mi">2018</span><span class="p">,</span> <span class="n">month</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">day</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">hour</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">minute</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="n">pytz</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+<span class="n">end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">window</span> <span class="o">=</span> <span class="s2">&quot;15m&quot;</span>
+
+<span class="n">temperature_band_stub</span> <span class="o">=</span> <span class="n">xbos_services_getter</span><span class="o">.</span><span class="n">get_temperature_band_stub</span><span class="p">()</span>
+<span class="n">comfortband</span> <span class="o">=</span> <span class="n">xbos_services_getter</span><span class="o">.</span><span class="n">get_comfortband</span><span class="p">(</span><span class="n">temperature_band_stub</span><span class="p">,</span> <span class="n">iter_bldg</span><span class="p">,</span> <span class="n">iter_zone</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">window</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="working-microservices">
 <h2>Working microservices<a class="headerlink" href="#working-microservices" title="Permalink to this headline">¶</a></h2>
@@ -114,7 +130,7 @@
 
 <dl class="function">
 <dt id="xbos_services_getter.xbos_services_getter.get_comfortband">
-<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_comfortband</code><span class="sig-paren">(</span><em>temperature_band_stub</em>, <em>bldg</em>, <em>zone</em>, <em>start</em>, <em>end</em>, <em>window</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_comfortband" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_comfortband</code><span class="sig-paren">(</span><em>temperature_band_stub</em>, <em>building</em>, <em>zone</em>, <em>start</em>, <em>end</em>, <em>window</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_comfortband" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets comfortband as pd.df.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -122,7 +138,7 @@
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>temperature_band_stub</strong> – grpc stub for temperature_band microservice</li>
-<li><strong>bldg</strong> – (str) building name</li>
+<li><strong>building</strong> – (str) building name</li>
 <li><strong>zone</strong> – (str) zone name</li>
 <li><strong>start</strong> – (datetime timezone aware) start of comfortband</li>
 <li><strong>end</strong> – (datetime timezone aware) end of comfortband</li>
@@ -149,7 +165,7 @@
 
 <dl class="function">
 <dt id="xbos_services_getter.xbos_services_getter.get_do_not_exceed">
-<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_do_not_exceed</code><span class="sig-paren">(</span><em>temperature_band_stub</em>, <em>bldg</em>, <em>zone</em>, <em>start</em>, <em>end</em>, <em>window</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_do_not_exceed" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_do_not_exceed</code><span class="sig-paren">(</span><em>temperature_band_stub</em>, <em>building</em>, <em>zone</em>, <em>start</em>, <em>end</em>, <em>window</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_do_not_exceed" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets comfortband as pd.df.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -157,7 +173,7 @@
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>temperature_band_stub</strong> – grpc stub for temperature_band microservice</li>
-<li><strong>bldg</strong> – (str) building name</li>
+<li><strong>building</strong> – (str) building name</li>
 <li><strong>zone</strong> – (str) zone name</li>
 <li><strong>start</strong> – (datetime timezone aware) start of safetyband</li>
 <li><strong>end</strong> – (datetime timezone aware) end of safetyband</li>
@@ -247,7 +263,7 @@
 
 <dl class="function">
 <dt id="xbos_services_getter.xbos_services_getter.get_occupancy">
-<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_occupancy</code><span class="sig-paren">(</span><em>occupancy_stub</em>, <em>bldg</em>, <em>zone</em>, <em>start</em>, <em>end</em>, <em>window</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_occupancy" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_occupancy</code><span class="sig-paren">(</span><em>occupancy_stub</em>, <em>building</em>, <em>zone</em>, <em>start</em>, <em>end</em>, <em>window</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_occupancy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets occupancy as pd.series.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -255,7 +271,7 @@
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>occupancy_stub</strong> – grpc stub for occupancy microservice</li>
-<li><strong>bldg</strong> – (str) building name</li>
+<li><strong>building</strong> – (str) building name</li>
 <li><strong>zone</strong> – (str) zone name</li>
 <li><strong>start</strong> – (datetime timezone aware)</li>
 <li><strong>end</strong> – (datetime timezone aware)</li>
