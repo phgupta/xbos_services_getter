@@ -39,7 +39,7 @@ TWO_STAGE_COOLING_ACTION = 5
 
 def get_window_in_sec(s):
     """Returns number of seconds in a given duration or zero if it fails.
-       Supported durations are seconds (s), minutes (m), hours (h), and days(d)."""
+    Supported durations are seconds (s), minutes (m), hours (h), and days(d)."""
     seconds_per_unit = {"s": 1, "m": 60, "h": 3600, "d": 86400}
     try:
         return int(float(s[:-1])) * seconds_per_unit[s[-1]]
@@ -48,11 +48,12 @@ def get_window_in_sec(s):
 
 # Building and Zone names
 def get_building_zone_names_stub(BUILDING_ZONE_NAMES_HOST_ADDRESS=None):
-    """
-    Get the stub to interact with the building_zone_address service.
+    """Get the stub to interact with the building_zone_address service.
+
     :param BUILDING_ZONE_NAMES_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
-    set as environment variable.
+        set as environment variable.
     :return: grpc Stub object.
+
     """
 
     if BUILDING_ZONE_NAMES_HOST_ADDRESS is None:
@@ -64,10 +65,11 @@ def get_building_zone_names_stub(BUILDING_ZONE_NAMES_HOST_ADDRESS=None):
 
 
 def get_buildings(building_zone_names_stub):
-    """
-    Gets all the building names supported by the services.
+    """Gets all the building names supported by the services.
+
     :param building_zone_names_stub: grpc stub for building_zone_names service.
     :return: list (string) building names.
+
     """
 
     building_names = building_zone_names_stub.GetBuildings(building_zone_names_pb2.BuildingRequest())
@@ -75,21 +77,23 @@ def get_buildings(building_zone_names_stub):
 
 
 def get_zones(building_zone_names_stub, building):
-    """
-    Gets all zone names for the given building which are supported by the services.
+    """Gets all zone names for the given building which are supported by the services.
+
     :param building_zone_names_stub: grpc stub for building_zone_names service.
     :param building: (string) building name. Needs to be in the list returned by get_buildings.
     :return: list (string) zone names.
+
     """
     zones = building_zone_names_stub.GetZones(building_zone_names_pb2.ZoneRequest(building=building))
     return [zone.name for zone in zones]
 
 
 def get_all_zones(building_zone_names_stub):
-    """
-    Gets all building and zones in a dictionary.
+    """Gets all building and zones in a dictionary.
+
     :param building_zone_names_stub: grpc stub for building_zone_names service.
     :return: dictionary <building name, list<zone names>> (strings)
+
     """
     buildings = get_buildings(building_zone_names_stub)
     zones = {}
@@ -102,11 +106,12 @@ def get_all_zones(building_zone_names_stub):
 
 # Temperature band functions
 def get_temperature_band_stub(TEMPERATURE_BANDS_HOST_ADDRESS=None):
-    """
-    Get the stub to interact with the temperature_band service.
+    """Get the stub to interact with the temperature_band service.
+
     :param TEMPERATURE_BANDS_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
-    set as environment variable.
+        set as environment variable.
     :return: grpc Stub object.
+
     """
 
     if TEMPERATURE_BANDS_HOST_ADDRESS is None:
@@ -185,13 +190,13 @@ def get_do_not_exceed(temperature_band_stub, building, zone, start, end, window)
 
 # occupancy functions
 def get_occupancy_stub(OCCUPANCY_HOST_ADDRESS=None):
-    """
-    Get the stub to interact with the occupancy service.
-    :param OCCUPANCY_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
-    set as environment variable.
-    :return: grpc Stub object.
-    """
+    """Get the stub to interact with the occupancy service.
 
+    :param OCCUPANCY_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
+        set as environment variable.
+    :return: grpc Stub object.
+
+    """
     if OCCUPANCY_HOST_ADDRESS is None:
         OCCUPANCY_HOST_ADDRESS = os.environ["OCCUPANCY_HOST_ADDRESS"]
 
@@ -232,12 +237,13 @@ def get_occupancy(occupancy_stub, building, zone, start, end, window):
 
 # discomfort functions
 def get_discomfort_stub(DISCOMFORT_HOST_ADDRESS=None):
+    """Get the stub to interact with the discomfort service.
+
+    :param DISCOMFORT_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
+     set as environment variable.
+    :return: grpc Stub object.
+
     """
-        Get the stub to interact with the discomfort service.
-        :param DISCOMFORT_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
-        set as environment variable.
-        :return: grpc Stub object.
-        """
 
     if DISCOMFORT_HOST_ADDRESS is None:
         DISCOMFORT_HOST_ADDRESS = os.environ["DISCOMFORT_HOST_ADDRESS"]
@@ -258,12 +264,13 @@ def get_discomfort(discomfort_stub, building, temperature, temperature_low, temp
 
 # indoor historic functions
 def get_indoor_historic_stub(INDOOR_DATA_HISTORICAL_HOST_ADDRESS=None):
-    """
-        Get the stub to interact with the indoor_data_historical service.
-        :param INDOOR_DATA_HISTORICAL_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
+    """Get the stub to interact with the indoor_data_historical service.
+
+    :param INDOOR_DATA_HISTORICAL_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
         set as environment variable.
-        :return: grpc Stub object.
-        """
+    :return: grpc Stub object.
+
+    """
 
     if INDOOR_DATA_HISTORICAL_HOST_ADDRESS is None:
         INDOOR_DATA_HISTORICAL_HOST_ADDRESS = os.environ["INDOOR_DATA_HISTORICAL_HOST_ADDRESS"]
@@ -371,12 +378,13 @@ def get_actions_historic(indoor_historic_stub, building, zone, start, end, windo
 
 # HVAC Consumption functions
 def get_hvac_consumption_stub(HVAC_CONSUMPTION_HOST_ADDRESS=None):
-    """
-        Get the stub to interact with the hvac_consumption service.
-        :param HVAC_CONSUMPTION_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
+    """Get the stub to interact with the hvac_consumption service.
+
+    :param HVAC_CONSUMPTION_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
         set as environment variable.
-        :return: grpc Stub object.
-        """
+    :return: grpc Stub object.
+
+    """
 
     if HVAC_CONSUMPTION_HOST_ADDRESS is None:
         HVAC_CONSUMPTION_HOST_ADDRESS = os.environ["HVAC_CONSUMPTION_HOST_ADDRESS"]
@@ -401,12 +409,13 @@ def get_hvac_consumption(hvac_consumption_stub, building, zone):
 
 # Outdoor temperature functions
 def get_outdoor_historic_stub(OUTDOOR_HISTORIC_HOST_ADDRESS=None):
-    """
-        Get the stub to interact with the outdoor_temperature_historical service.
-        :param OUTDOOR_HISTORIC_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
+    """Get the stub to interact with the outdoor_temperature_historical service.
+
+    :param OUTDOOR_HISTORIC_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
         set as environment variable.
-        :return: grpc Stub object.
-        """
+    :return: grpc Stub object.
+
+    """
 
     if OUTDOOR_HISTORIC_HOST_ADDRESS is None:
         OUTDOOR_HISTORIC_HOST_ADDRESS = os.environ["OUTDOOR_HISTORIC_HOST_ADDRESS"]
