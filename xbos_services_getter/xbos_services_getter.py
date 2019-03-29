@@ -73,7 +73,7 @@ def get_buildings(building_zone_names_stub):
     """
 
     building_names = building_zone_names_stub.GetBuildings(building_zone_names_pb2.BuildingRequest())
-    return [bldg.name for bldg in building_names]
+    return [bldg.name for bldg in building_names.names]
 
 
 def get_zones(building_zone_names_stub, building):
@@ -85,11 +85,11 @@ def get_zones(building_zone_names_stub, building):
 
     """
     zones = building_zone_names_stub.GetZones(building_zone_names_pb2.ZoneRequest(building=building))
-    return [zone.name for zone in zones]
+    return [zone.name for zone in zones.names]
 
 
-def get_all_zones(building_zone_names_stub):
-    """Gets all building and zones in a dictionary.
+def get_all_buildings_zones(building_zone_names_stub):
+    """Gets all building and corresponding zones in a dictionary.
 
     :param building_zone_names_stub: grpc stub for building_zone_names service.
     :return: dictionary <building name, list<zone names>> (strings)
@@ -99,7 +99,7 @@ def get_all_zones(building_zone_names_stub):
     zones = {}
 
     for bldg in buildings:
-        zones[bldg.building] = get_zones(building_zone_names_stub, bldg.building)
+        zones[bldg] = get_zones(building_zone_names_stub, bldg)
 
     return zones
 
@@ -408,19 +408,19 @@ def get_hvac_consumption(hvac_consumption_stub, building, zone):
 
 
 # Outdoor temperature functions
-def get_outdoor_historic_stub(OUTDOOR_HISTORIC_HOST_ADDRESS=None):
+def get_outdoor_historic_stub(OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS=None):
     """Get the stub to interact with the outdoor_temperature_historical service.
 
-    :param OUTDOOR_HISTORIC_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
-        set as environment variable.
+    :param OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS: Optional argument to supply host address for given service.
+        Otherwise, set as environment variable.
     :return: grpc Stub object.
 
     """
 
-    if OUTDOOR_HISTORIC_HOST_ADDRESS is None:
-        OUTDOOR_HISTORIC_HOST_ADDRESS = os.environ["OUTDOOR_HISTORIC_HOST_ADDRESS"]
+    if OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS is None:
+        OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS = os.environ["OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS"]
 
-    outdoor_historic_channel = grpc.insecure_channel(OUTDOOR_HISTORIC_HOST_ADDRESS)
+    outdoor_historic_channel = grpc.insecure_channel(OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS)
     return outdoor_temperature_historical_pb2_grpc.OutdoorTemperatureStub(outdoor_historic_channel)
 
 
