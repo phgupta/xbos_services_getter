@@ -10,14 +10,14 @@ from xbos_services_getter.lib import occupancy_pb2
 from xbos_services_getter.lib import occupancy_pb2_grpc
 from xbos_services_getter.lib import outdoor_temperature_historical_pb2
 from xbos_services_getter.lib import outdoor_temperature_historical_pb2_grpc
-from xbos_services_getter.lib import outdoor_temperature_prediction_pb2
-from xbos_services_getter.lib import outdoor_temperature_prediction_pb2_grpc
-from xbos_services_getter.lib import price_pb2
-from xbos_services_getter.lib import price_pb2_grpc
+# from xbos_services_getter.lib import outdoor_temperature_prediction_pb2
+# from xbos_services_getter.lib import outdoor_temperature_prediction_pb2_grpc
+# from xbos_services_getter.lib import price_pb2
+# from xbos_services_getter.lib import price_pb2_grpc
 from xbos_services_getter.lib import schedules_pb2
 from xbos_services_getter.lib import schedules_pb2_grpc
-from xbos_services_getter.lib import thermal_model_pb2
-from xbos_services_getter.lib import thermal_model_pb2_grpc
+# from xbos_services_getter.lib import thermal_model_pb2
+# from xbos_services_getter.lib import thermal_model_pb2_grpc
 from xbos_services_getter.lib import building_zone_names_pb2
 from xbos_services_getter.lib import building_zone_names_pb2_grpc
 
