@@ -9,7 +9,7 @@ with open(path.join(this_directory, 'README.md')) as f:
 
 setup(
     name='xbos-services-getter',
-    version='0.0.2dev2',
+    version='0.0.2dev3',
     packages=find_packages(),
     # license='Creative Commons Attribution-Noncommercial-Share Alike license',
     author='Daniel Lengyel',
@@ -20,7 +20,6 @@ setup(
     install_requires=[
     	"pandas == 0.24.0",
     	"pytz == 2018.9",
-        "xbos-services-utils3 <= 0.0.10.dev0",
         "grpcio==1.16.1",
         "grpcio-tools==1.16.1",
     ],
