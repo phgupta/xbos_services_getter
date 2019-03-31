@@ -12,8 +12,8 @@ from xbos_services_getter.lib import outdoor_temperature_historical_pb2
 from xbos_services_getter.lib import outdoor_temperature_historical_pb2_grpc
 # from xbos_services_getter.lib import outdoor_temperature_prediction_pb2
 # from xbos_services_getter.lib import outdoor_temperature_prediction_pb2_grpc
-# from xbos_services_getter.lib import price_pb2
-# from xbos_services_getter.lib import price_pb2_grpc
+from xbos_services_getter.lib import price_pb2
+from xbos_services_getter.lib import price_pb2_grpc
 from xbos_services_getter.lib import schedules_pb2
 from xbos_services_getter.lib import schedules_pb2_grpc
 # from xbos_services_getter.lib import thermal_model_pb2
@@ -45,6 +45,7 @@ def get_window_in_sec(s):
         return int(float(s[:-1])) * seconds_per_unit[s[-1]]
     except:
         return 0
+
 
 # Building and Zone names
 def get_building_zone_names_stub(BUILDING_ZONE_NAMES_HOST_ADDRESS=None):
@@ -233,6 +234,71 @@ def get_occupancy(occupancy_stub, building, zone, start, end, window):
         occupancy_final.loc[msg_datetime] = msg.occupancy
 
     return occupancy_final
+
+
+# price functions
+def get_price_stub(PRICE_HOST_ADDRESS=None):
+    """Get the stub to interact with the price service.
+
+    :param PRICEPRICE_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
+        set as environment variable.
+    :return: grpc Stub object.
+
+    """
+    if PRICE_HOST_ADDRESS is None:
+        PRICE_HOST_ADDRESS = os.environ["PRICE_HOST_ADDRESS"]
+
+    price_channel = grpc.insecure_channel(PRICE_HOST_ADDRESS)
+    return price_pb2_grpc.PriceStub(price_channel)
+
+
+def get_tariff_and_utility(price_stub, building):
+    """Gets the tariff and utility for the given building as a dictionary.
+
+    :param price_stub: grpc stub for price microservice
+    :param building: (str) building name
+    :return: (dictionary) keys=["tariff", "utility"]
+    """
+    tariff_and_utility = price_stub.GetTariffAndUtility(price_pb2.BuildingRequest(building=building))
+    return {"tariff": tariff_and_utility.tariff, "utility": tariff_and_utility.utility}
+
+
+def get_price(price_stub, building, price_type, start, end, window):
+    """Gets the price as a pandas dataframe.
+
+    :param price_stub: grpc stub for price microservice
+    :param building: (str) building name
+    :param price_type: (str) "ENERGY" or "DEMAND"
+    :param start: (datetime timezone aware)
+    :param end: (datetime timezone aware)
+    :param window: (str) the interval in which to split the data.
+    :return: pd.DataFrame columns=["price" (float), "unit" string] index=start to end with window intervals.
+    """
+    if price_type not in ["ENERGY", "DEMAND"]:
+        raise AttributeError("Given price type is invalid. Use ENERGY or DEMAND.")
+
+    start_unix = start.timestamp() * 1e9
+    end_unix = end.timestamp() * 1e9
+    window_seconds = get_window_in_sec(window)
+
+    # call service
+    tariff_and_utility = get_tariff_and_utility(price_stub, building)
+    price_response = price_stub.GetPrice(price_pb2.PriceRequest(utility=tariff_and_utility["utility"],
+                                                       tariff=tariff_and_utility["tariff"],
+                                                       price_type=price_type,
+                                                       start=start_unix,
+                                                       end=end_unix,
+                                                       window=window))
+
+    # process data
+    price_final = pd.DataFrame(columns=["price", "unit"], index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    for msg in price_response.prices:
+        msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
+            tz=start.tzinfo)
+        price_final.loc[msg_datetime]["price"] = msg.price
+        price_final.loc[msg_datetime]["unit"] = msg.unit
+
+    return price_final
 
 
 # discomfort functions
