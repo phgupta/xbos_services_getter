@@ -18,7 +18,6 @@ from xbos_services_getter.lib import schedules_pb2
 from xbos_services_getter.lib import schedules_pb2_grpc
 from xbos_services_getter.lib import indoor_temperature_prediction_pb2
 from xbos_services_getter.lib import indoor_temperature_prediction_pb2_grpc
-from xbos_services_getter.lib import thermal_model_pb2_grpc
 from xbos_services_getter.lib import building_zone_names_pb2
 from xbos_services_getter.lib import building_zone_names_pb2_grpc
 
@@ -409,7 +408,7 @@ def get_actions_historic(indoor_historic_stub, building, zone, start, end, windo
 
 
 # indoor historic functions
-def get_indoor_temperature_prediction_stub(INDOOR_TEMPERATURE_PREDICTION=None):
+def get_indoor_temperature_prediction_stub(INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS=None):
     """Get the stub to interact with the indoor_temperature_prediction service.
 
     :param INDOOR_TEMPERATURE_PREDICTION: Optional argument to supply host address for given service. Otherwise,
@@ -418,10 +417,10 @@ def get_indoor_temperature_prediction_stub(INDOOR_TEMPERATURE_PREDICTION=None):
 
     """
 
-    if INDOOR_TEMPERATURE_PREDICTION is None:
-        INDOOR_TEMPERATURE_PREDICTION = os.environ["INDOOR_TEMPERATURE_PREDICTION"]
+    if INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS is None:
+        INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS = os.environ["INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS"]
 
-    indoor_temperature_prediction_channel = grpc.insecure_channel(INDOOR_TEMPERATURE_PREDICTION)
+    indoor_temperature_prediction_channel = grpc.insecure_channel(INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS)
     return indoor_temperature_prediction_pb2_grpc.IndoorTemperaturePredictionStub(indoor_temperature_prediction_channel)
 
 
