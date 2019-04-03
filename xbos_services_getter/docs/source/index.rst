@@ -62,8 +62,14 @@ Working microservices
 - HVAC Consumption
    Gets the HVAC consumption for every possible action for a given building and HVAC zone. 
 
-.. -  Outdoor Temperature Historic
-    Gets historic outdoor temperatures from weather.gov
+ -  Outdoor Temperature Historic
+    Gets historic outdoor temperatures from weather.gov.
+    
+- Indoor Temperature Prediction
+   Predicts indoor temperature.
+  
+ -  Indoor Data Historic
+    Gets historic indoor temperatures and actions for a given building and zone.
 
 Functions
 ^^^^^^^^^
