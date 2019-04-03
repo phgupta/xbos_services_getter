@@ -30,12 +30,14 @@ Example 1: Get a Comfortband
     import pytz
     import xbos_services_getter
     
-    start = datetime.datetime(year=2018, month=1, day=1, hour=0, minute=0).replace(tzinfo=pytz.utc)
+    start = pytz.timezone("US/Pacific").localize(datetime.datetime(year=2018, month=1, day=1, hour=0, minute=0))
     end = start + datetime.timedelta(days=7)
     window = "15m"
+    building = "ciee"
+    zone = "HVAC_Zone_Eastzone"
 
     temperature_band_stub = xbos_services_getter.get_temperature_band_stub()
-    comfortband = xbos_services_getter.get_comfortband(temperature_band_stub, iter_bldg, iter_zone, start, end, window)
+    comfortband = xbos_services_getter.get_comfortband(temperature_band_stub, building, zone, start, end, window)
 
 
 
@@ -60,8 +62,14 @@ Working microservices
 - HVAC Consumption
    Gets the HVAC consumption for every possible action for a given building and HVAC zone. 
 
-.. -  Outdoor Temperature Historic
-    Gets historic outdoor temperatures from weather.gov
+- Outdoor Temperature Historic
+   Gets historic outdoor temperatures from weather.gov.
+
+- Indoor Temperature Prediction
+   Predicts indoor temperature.
+
+- Indoor Data Historic
+   Gets historic indoor temperatures and actions for a given building and zone.
 
 Functions
 ^^^^^^^^^
