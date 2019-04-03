@@ -30,7 +30,7 @@ Example 1: Get a Comfortband
     import pytz
     import xbos_services_getter
     
-    start = datetime.datetime(year=2018, month=1, day=1, hour=0, minute=0).replace(tzinfo=pytz.utc)
+    start = pytz.timezone("US/Pacific").localize(datetime.datetime(year=2018, month=1, day=1, hour=0, minute=0))
     end = start + datetime.timedelta(days=7)
     window = "15m"
     building = "ciee"
