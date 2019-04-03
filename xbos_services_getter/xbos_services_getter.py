@@ -411,7 +411,7 @@ def get_actions_historic(indoor_historic_stub, building, zone, start, end, windo
 def get_indoor_temperature_prediction_stub(INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS=None):
     """Get the stub to interact with the indoor_temperature_prediction service.
 
-    :param INDOOR_TEMPERATURE_PREDICTION: Optional argument to supply host address for given service. Otherwise,
+    :param INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
         set as environment variable.
     :return: grpc Stub object.
 
@@ -425,7 +425,7 @@ def get_indoor_temperature_prediction_stub(INDOOR_TEMPERATURE_PREDICTION_HOST_AD
 
 
 def get_indoor_temperature_prediction(indoor_temperature_prediction_stub, building, zone, current_time, action, t_in, t_out, t_prev,
-                                      other_zone_temperatures, occupancy):
+                                      other_zone_temperatures):
     """Gets prediction of indoor temperature.
 
     :param indoor_temperature_prediction_stub: grpc stub for prediction of indoor temperature microservice
@@ -437,7 +437,6 @@ def get_indoor_temperature_prediction(indoor_temperature_prediction_stub, buildi
     :param t_out: (float) currrent outdoor temperature.
     :param t_prev: (float) the temperature 5 min ago.
     :param other_zone_temperatures: {zone_i: indoor temperature of zone_i}
-    :param occupancy: (float) Indicator: Is the zone currently occupied.
     :return: (float) temperature in 5 minutes after current_time in Fahrenheit.
 
     """
@@ -450,7 +449,7 @@ def get_indoor_temperature_prediction(indoor_temperature_prediction_stub, buildi
                                               indoor_temperature=t_in, previous_indoor_temperature=t_prev,
                                                                        outside_temperature=t_out,
                                               other_zone_temperatures=other_zone_temperatures,
-                                              temperature_unit="F", occupancy=occupancy))
+                                              temperature_unit="F"))
 
     return indoor_prediction_response.temperature
 
