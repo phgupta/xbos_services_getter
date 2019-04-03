@@ -16,8 +16,9 @@ from xbos_services_getter.lib import price_pb2
 from xbos_services_getter.lib import price_pb2_grpc
 from xbos_services_getter.lib import schedules_pb2
 from xbos_services_getter.lib import schedules_pb2_grpc
-# from xbos_services_getter.lib import thermal_model_pb2
-# from xbos_services_getter.lib import thermal_model_pb2_grpc
+from xbos_services_getter.lib import indoor_temperature_prediction_pb2
+from xbos_services_getter.lib import indoor_temperature_prediction_pb2_grpc
+from xbos_services_getter.lib import thermal_model_pb2_grpc
 from xbos_services_getter.lib import building_zone_names_pb2
 from xbos_services_getter.lib import building_zone_names_pb2_grpc
 
@@ -277,8 +278,8 @@ def get_price(price_stub, building, price_type, start, end, window):
     if price_type not in ["ENERGY", "DEMAND"]:
         raise AttributeError("Given price type is invalid. Use ENERGY or DEMAND.")
 
-    start_unix = start.timestamp() * 1e9
-    end_unix = end.timestamp() * 1e9
+    start_unix = int(start.timestamp() * 1e9)
+    end_unix = int(end.timestamp() * 1e9)
     window_seconds = get_window_in_sec(window)
 
     # call service
@@ -407,39 +408,52 @@ def get_actions_historic(indoor_historic_stub, building, zone, start, end, windo
     return historic_action_final
 
 
-# # Indoor temperature prediction functions
-# def get_indoor_temperature_prediction_stub():
-#     indoor_temperature_prediction_channel = grpc.insecure_channel(INDOOR_PREDICTION_ADDRESS)
-#     return thermal_model_pb2_grpc.ThermalModelStub(indoor_temperature_prediction_channel)
-#
-#
-# def get_indoor_temperature_prediction(indoor_prediction_stub, building, zone, current_time, action, t_in, t_out,
-#                                       other_zone_temperatures, occupancy):
-#     """Gets prediction of indoor temperature.
-#
-#     :param indoor_prediction_stub: grpc stub for prediction of indoor temperature microservice
-#     :param building: (str) building name
-#     :param zone: (str) zone name
-#     :param current_time: (datetime timezone aware)
-#     :param action: (int) Action as given in utils file.
-#     :param t_in: (float) current temperature inside of zone.
-#     :param t_out: (float) currrent outdoor temperature.
-#     :param other_zone_temperatures: {zone_i: indoor temperature of zone_i}
-#     :param occupancy: (float) Indicator: Is the zone currently occupied.
-#     :return: (float) temperature in 5 minutes after current_time in Fahrenheit.
-#
-#     """
-#     current_time_unix = int(current_time.timestamp() * 1e9)
-#
-#     # call service
-#     indoor_prediction_response = indoor_prediction_stub.GetPrediction(
-#         thermal_model_pb2.PredictionRequest(building=building, zone=zone, current_time=current_time_unix,
-#                                               action=action,
-#                                               indoor_temperature=t_in, outside_temperature=t_out,
-#                                               other_zone_temperatures=other_zone_temperatures,
-#                                               temperature_unit="F", occupancy=occupancy))
-#
-#     return indoor_prediction_response.temperature
+# indoor historic functions
+def get_indoor_temperature_prediction_stub(INDOOR_TEMPERATURE_PREDICTION=None):
+    """Get the stub to interact with the indoor_temperature_prediction service.
+
+    :param INDOOR_TEMPERATURE_PREDICTION: Optional argument to supply host address for given service. Otherwise,
+        set as environment variable.
+    :return: grpc Stub object.
+
+    """
+
+    if INDOOR_TEMPERATURE_PREDICTION is None:
+        INDOOR_TEMPERATURE_PREDICTION = os.environ["INDOOR_TEMPERATURE_PREDICTION"]
+
+    indoor_temperature_prediction_channel = grpc.insecure_channel(INDOOR_TEMPERATURE_PREDICTION)
+    return indoor_temperature_prediction_pb2_grpc.IndoorTemperaturePredictionStub(indoor_temperature_prediction_channel)
+
+
+def get_indoor_temperature_prediction(indoor_temperature_prediction_stub, building, zone, current_time, action, t_in, t_out, t_prev,
+                                      other_zone_temperatures, occupancy):
+    """Gets prediction of indoor temperature.
+
+    :param indoor_temperature_prediction_stub: grpc stub for prediction of indoor temperature microservice
+    :param building: (str) building name
+    :param zone: (str) zone name
+    :param current_time: (datetime timezone aware)
+    :param action: (int) Action as given in utils file.
+    :param t_in: (float) current temperature inside of zone.
+    :param t_out: (float) currrent outdoor temperature.
+    :param t_prev: (float) the temperature 5 min ago.
+    :param other_zone_temperatures: {zone_i: indoor temperature of zone_i}
+    :param occupancy: (float) Indicator: Is the zone currently occupied.
+    :return: (float) temperature in 5 minutes after current_time in Fahrenheit.
+
+    """
+    current_time_unix = int(current_time.timestamp() * 1e9)
+
+    # call service
+    indoor_prediction_response = indoor_temperature_prediction_stub.GetSecondOrderPrediction(
+        indoor_temperature_prediction_pb2.SecondOrderPredictionRequest(building=building, zone=zone, current_time=current_time_unix,
+                                              action=action,
+                                              indoor_temperature=t_in, previous_indoor_temperature=t_prev,
+                                                                       outside_temperature=t_out,
+                                              other_zone_temperatures=other_zone_temperatures,
+                                              temperature_unit="F", occupancy=occupancy))
+
+    return indoor_prediction_response.temperature
 
 
 # HVAC Consumption functions

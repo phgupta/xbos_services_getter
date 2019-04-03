@@ -86,7 +86,7 @@
 <li><a class="reference internal" href="#quick-start">Quick Start</a></li>
 <li><a class="reference internal" href="#example-1-get-a-comfortband">Example 1: Get a Comfortband</a></li>
 <li><a class="reference internal" href="#working-microservices">Working microservices</a></li>
-<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#module-xbos_services_getter.xbos_services_getter">Functions</a></li>
 </ul>
 </li>
 </ul>
@@ -222,8 +222,410 @@
 </li>
 </ul>
 </div>
-<div class="section" id="functions">
-<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-xbos_services_getter.xbos_services_getter">
+<span id="functions"></span><h2>Functions<a class="headerlink" href="#module-xbos_services_getter.xbos_services_getter" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_window_in_sec">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_window_in_sec</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_window_in_sec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns number of seconds in a given duration or zero if it fails.
+Supported durations are seconds (s), minutes (m), hours (h), and days(d).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_building_zone_names_stub">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_building_zone_names_stub</code><span class="sig-paren">(</span><em>BUILDING_ZONE_NAMES_HOST_ADDRESS=None</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_building_zone_names_stub" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the stub to interact with the building_zone_address service.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>BUILDING_ZONE_NAMES_HOST_ADDRESS</strong> – Optional argument to supply host address for given service. Otherwise,
+set as environment variable.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">grpc Stub object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_buildings">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_buildings</code><span class="sig-paren">(</span><em>building_zone_names_stub</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_buildings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets all the building names supported by the services.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>building_zone_names_stub</strong> – grpc stub for building_zone_names service.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list (string) building names.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_zones">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_zones</code><span class="sig-paren">(</span><em>building_zone_names_stub</em>, <em>building</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_zones" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets all zone names for the given building which are supported by the services.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>building_zone_names_stub</strong> – grpc stub for building_zone_names service.</li>
+<li><strong>building</strong> – (string) building name. Needs to be in the list returned by get_buildings.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list (string) zone names.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_all_buildings_zones">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_all_buildings_zones</code><span class="sig-paren">(</span><em>building_zone_names_stub</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_all_buildings_zones" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets all building and corresponding zones in a dictionary.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>building_zone_names_stub</strong> – grpc stub for building_zone_names service.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dictionary &lt;building name, list&lt;zone names&gt;&gt; (strings)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_temperature_band_stub">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_temperature_band_stub</code><span class="sig-paren">(</span><em>TEMPERATURE_BANDS_HOST_ADDRESS=None</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_temperature_band_stub" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the stub to interact with the temperature_band service.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>TEMPERATURE_BANDS_HOST_ADDRESS</strong> – Optional argument to supply host address for given service. Otherwise,
+set as environment variable.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">grpc Stub object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_comfortband">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_comfortband</code><span class="sig-paren">(</span><em>temperature_band_stub</em>, <em>building</em>, <em>zone</em>, <em>start</em>, <em>end</em>, <em>window</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_comfortband" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets comfortband as pd.df.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>temperature_band_stub</strong> – grpc stub for temperature_band microservice</li>
+<li><strong>building</strong> – (str) building name</li>
+<li><strong>zone</strong> – (str) zone name</li>
+<li><strong>start</strong> – (datetime timezone aware) start of comfortband</li>
+<li><strong>end</strong> – (datetime timezone aware) end of comfortband</li>
+<li><strong>window</strong> – (str) the interval in which to split the comfortband.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">pd.df columns=[“t_low”, “t_high”], valus=float, index=time</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_do_not_exceed">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_do_not_exceed</code><span class="sig-paren">(</span><em>temperature_band_stub</em>, <em>building</em>, <em>zone</em>, <em>start</em>, <em>end</em>, <em>window</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_do_not_exceed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets do_not_exceed as pd.df.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>temperature_band_stub</strong> – grpc stub for temperature_band microservice</li>
+<li><strong>building</strong> – (str) building name</li>
+<li><strong>zone</strong> – (str) zone name</li>
+<li><strong>start</strong> – (datetime timezone aware) start of do_not_exceed</li>
+<li><strong>end</strong> – (datetime timezone aware) end of do_not_exceed</li>
+<li><strong>window</strong> – (str) the interval in which to split the do_not_exceed.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">pd.df columns=[“t_low”, “t_high”], valus=float, index=time</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_occupancy_stub">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_occupancy_stub</code><span class="sig-paren">(</span><em>OCCUPANCY_HOST_ADDRESS=None</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_occupancy_stub" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the stub to interact with the occupancy service.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>OCCUPANCY_HOST_ADDRESS</strong> – Optional argument to supply host address for given service. Otherwise,
+set as environment variable.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">grpc Stub object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_occupancy">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_occupancy</code><span class="sig-paren">(</span><em>occupancy_stub</em>, <em>building</em>, <em>zone</em>, <em>start</em>, <em>end</em>, <em>window</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_occupancy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets occupancy as pd.series.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>occupancy_stub</strong> – grpc stub for occupancy microservice</li>
+<li><strong>building</strong> – (str) building name</li>
+<li><strong>zone</strong> – (str) zone name</li>
+<li><strong>start</strong> – (datetime timezone aware)</li>
+<li><strong>end</strong> – (datetime timezone aware)</li>
+<li><strong>window</strong> – (str) the interval in which to split the data.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">pd.series valus=float, index=time</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_price_stub">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_price_stub</code><span class="sig-paren">(</span><em>PRICE_HOST_ADDRESS=None</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_price_stub" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the stub to interact with the price service.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>PRICEPRICE_HOST_ADDRESS</strong> – Optional argument to supply host address for given service. Otherwise,
+set as environment variable.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">grpc Stub object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_tariff_and_utility">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_tariff_and_utility</code><span class="sig-paren">(</span><em>price_stub</em>, <em>building</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_tariff_and_utility" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the tariff and utility for the given building as a dictionary.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>price_stub</strong> – grpc stub for price microservice</li>
+<li><strong>building</strong> – (str) building name</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">(dictionary) keys=[“tariff”, “utility”]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_price">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_price</code><span class="sig-paren">(</span><em>price_stub</em>, <em>building</em>, <em>price_type</em>, <em>start</em>, <em>end</em>, <em>window</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_price" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the price as a pandas dataframe.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>price_stub</strong> – grpc stub for price microservice</li>
+<li><strong>building</strong> – (str) building name</li>
+<li><strong>price_type</strong> – (str) “ENERGY” or “DEMAND”</li>
+<li><strong>start</strong> – (datetime timezone aware)</li>
+<li><strong>end</strong> – (datetime timezone aware)</li>
+<li><strong>window</strong> – (str) the interval in which to split the data.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">pd.DataFrame columns=[“price” (float), “unit” string] index=start to end with window intervals.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_discomfort_stub">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_discomfort_stub</code><span class="sig-paren">(</span><em>DISCOMFORT_HOST_ADDRESS=None</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_discomfort_stub" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the stub to interact with the discomfort service.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>DISCOMFORT_HOST_ADDRESS</strong> – Optional argument to supply host address for given service. Otherwise,
+set as environment variable.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">grpc Stub object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_discomfort">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_discomfort</code><span class="sig-paren">(</span><em>discomfort_stub</em>, <em>building</em>, <em>temperature</em>, <em>temperature_low</em>, <em>temperature_high</em>, <em>occupancy</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_discomfort" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_indoor_historic_stub">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_indoor_historic_stub</code><span class="sig-paren">(</span><em>INDOOR_DATA_HISTORICAL_HOST_ADDRESS=None</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_indoor_historic_stub" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the stub to interact with the indoor_data_historical service.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>INDOOR_DATA_HISTORICAL_HOST_ADDRESS</strong> – Optional argument to supply host address for given service. Otherwise,
+set as environment variable.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">grpc Stub object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_indoor_temperature_historic">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_indoor_temperature_historic</code><span class="sig-paren">(</span><em>indoor_historic_stub</em>, <em>building</em>, <em>zone</em>, <em>start</em>, <em>end</em>, <em>window</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_indoor_temperature_historic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets historic indoor temperature as pd.series.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>indoor_historic_stub</strong> – grpc stub for historic indoor temperature microservice</li>
+<li><strong>building</strong> – (str) building name</li>
+<li><strong>zone</strong> – (str) zone name</li>
+<li><strong>start</strong> – (datetime timezone aware)</li>
+<li><strong>end</strong> – (datetime timezone aware)</li>
+<li><strong>window</strong> – (str) the interval in which to split the data.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">pd.series valus=float, index=time</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_actions_historic">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_actions_historic</code><span class="sig-paren">(</span><em>indoor_historic_stub</em>, <em>building</em>, <em>zone</em>, <em>start</em>, <em>end</em>, <em>window</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_actions_historic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets historic indoor temperature as pd.series.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>indoor_historic_stub</strong> – grpc stub for historic indoor temperature microservice</li>
+<li><strong>building</strong> – (str) building name</li>
+<li><strong>zone</strong> – (str) zone name</li>
+<li><strong>start</strong> – (datetime timezone aware)</li>
+<li><strong>end</strong> – (datetime timezone aware)</li>
+<li><strong>window</strong> – (str) the interval in which to split the data.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">pd.series valus=float, index=time</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_hvac_consumption_stub">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_hvac_consumption_stub</code><span class="sig-paren">(</span><em>HVAC_CONSUMPTION_HOST_ADDRESS=None</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_hvac_consumption_stub" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the stub to interact with the hvac_consumption service.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>HVAC_CONSUMPTION_HOST_ADDRESS</strong> – Optional argument to supply host address for given service. Otherwise,
+set as environment variable.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">grpc Stub object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_hvac_consumption">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_hvac_consumption</code><span class="sig-paren">(</span><em>hvac_consumption_stub</em>, <em>building</em>, <em>zone</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_hvac_consumption" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_outdoor_historic_stub">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_outdoor_historic_stub</code><span class="sig-paren">(</span><em>OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS=None</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_outdoor_historic_stub" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the stub to interact with the outdoor_temperature_historical service.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS</strong> – Optional argument to supply host address for given service.
+Otherwise, set as environment variable.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">grpc Stub object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="xbos_services_getter.xbos_services_getter.get_outdoor_temperature_historic">
+<code class="descclassname">xbos_services_getter.xbos_services_getter.</code><code class="descname">get_outdoor_temperature_historic</code><span class="sig-paren">(</span><em>outdoor_historic_stub</em>, <em>building</em>, <em>start</em>, <em>end</em>, <em>window</em><span class="sig-paren">)</span><a class="headerlink" href="#xbos_services_getter.xbos_services_getter.get_outdoor_temperature_historic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets historic outdoor temperature as pd.series.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>indoor_historic_stub</strong> – grpc stub for historic outdoor temperature microservice</li>
+<li><strong>building</strong> – (str) building name</li>
+<li><strong>zone</strong> – (str) zone name</li>
+<li><strong>start</strong> – (datetime timezone aware)</li>
+<li><strong>end</strong> – (datetime timezone aware)</li>
+<li><strong>window</strong> – (str) the interval in which to split the data.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">pd.series valus=float, index=time</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <div class="toctree-wrapper compound">
 </div>
 </div>

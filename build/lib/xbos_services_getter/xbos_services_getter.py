@@ -277,8 +277,8 @@ def get_price(price_stub, building, price_type, start, end, window):
     if price_type not in ["ENERGY", "DEMAND"]:
         raise AttributeError("Given price type is invalid. Use ENERGY or DEMAND.")
 
-    start_unix = start.timestamp() * 1e9
-    end_unix = end.timestamp() * 1e9
+    start_unix = int(start.timestamp() * 1e9)
+    end_unix = int(end.timestamp() * 1e9)
     window_seconds = get_window_in_sec(window)
 
     # call service
