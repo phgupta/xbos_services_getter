@@ -20,6 +20,8 @@ from xbos_services_getter.lib import indoor_temperature_prediction_pb2
 from xbos_services_getter.lib import indoor_temperature_prediction_pb2_grpc
 from xbos_services_getter.lib import building_zone_names_pb2
 from xbos_services_getter.lib import building_zone_names_pb2_grpc
+from xbos_services_getter.lib import meter_data_historical_pb2
+from xbos_services_getter.lib import meter_data_historical_pb2_grpc
 
 import datetime
 import pytz
@@ -531,5 +533,62 @@ def get_outdoor_temperature_historic(outdoor_historic_stub, building, start, end
         historic_outdoor_final.loc[msg_datetime] = msg.temperature
 
     return historic_outdoor_final
+
+
+
+def get_meter_data_historical_stub(METER_DATA_HISTORICAL_HOST_ADDRESS=None):
+    """ Get stub to interact with meter data service.
+    :param METER_DATA_HISTORICAL_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
+        set as environment variable.
+    :return: grpc Stub object.
+    """
+
+    if not METER_DATA_HISTORICAL_HOST_ADDRESS:
+        METER_DATA_HISTORICAL_HOST_ADDRESS = os.environ["METER_DATA_HISTORICAL_HOST_ADDRESS"]
+
+    channel = grpc.insecure_channel(METER_DATA_HISTORICAL_HOST_ADDRESS)
+    stub = meter_data_historical_pb2_grpc.MeterDataHistoricalStub(channel)
+    return stub
+
+
+def get_meter_data_historical(meter_data_stub, bldg, start, end, point_type, aggregate, window):
+    """ Get meter data as a dataframe.
+
+    :param meter_data_stub: grpc stub for meter data service.
+    :param bldg: list(str) - list of buildings.
+    :param start: datetime (timezone aware)
+    :param end: datetime (timezone aware)
+    :param point_type: (str) Building_Electric_Meter or Green_Button_Meter
+    :param aggregate: (str) Values include MEAN, MAX, MIN, COUNT, SUM and RAW (the temporal window parameter is ignored)
+    :param window: (str) Size of the moving window.
+    :return: pd.DataFrame(), defaultdict(list) - Meter data, dictionary that maps meter data's columns (uuid's) to sites
+    """
+
+    start_utc = start.astimezone(pytz.UTC)
+    end_utc = end.astimezone(pytz.UTC)
+    start_str = start_utc.strftime('%Y-%m-%dT%H:%M:%SZ')
+    end_str = end_utc.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+    # Create gRPC request object
+    request = meter_data_historical_pb2.Request(
+        buildings=bldg,
+        start=start_str,
+        end=end_str,
+        point_type=point_type,
+        aggregate=aggregate,
+        window=window
+    )
+
+    response = meter_data_stub.GetMeterDataHistorical(request)
+
+    df = pd.DataFrame()
+    for point in response.point:
+        df = df.append([[point.time, point.power]])
+
+    df.columns = ['datetime', 'power']
+    df.set_index('datetime', inplace=True)
+
+    return df
+
 
 
