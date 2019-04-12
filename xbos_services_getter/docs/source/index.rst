@@ -5,7 +5,9 @@ Intro
 ^^^^^
 Allows for easy retrieval of data which is relevant to XBOS projects. 
 
-A Ptyhon 3.5+ wrapper for the XBOS microservices. 
+A Python 3.5+ wrapper for the XBOS microservices.
+
+Note: Only supports precision up to seconds.
 
 Quick Setup
 ^^^^^^^^^^^

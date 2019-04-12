@@ -137,6 +137,9 @@ def get_comfortband(temperature_band_stub, building, zone, start, end, window):
     :return: pd.df columns=["t_low", "t_high"], valus=float, index=time
 
     """
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
+
     start_unix = start.timestamp() * 1e9
     end_unix = end.timestamp() * 1e9
     window_seconds = get_window_in_sec(window)
@@ -170,6 +173,9 @@ def get_do_not_exceed(temperature_band_stub, building, zone, start, end, window)
     :return: pd.df columns=["t_low", "t_high"], valus=float, index=time
 
     """
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
+
     start_unix = start.timestamp() * 1e9
     end_unix = end.timestamp() * 1e9
     window_seconds = get_window_in_sec(window)
@@ -219,6 +225,8 @@ def get_occupancy(occupancy_stub, building, zone, start, end, window):
     :return: pd.series valus=float, index=time
 
     """
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
 
     start_unix = start.timestamp() * 1e9
     end_unix = end.timestamp() * 1e9
@@ -278,6 +286,9 @@ def get_price(price_stub, building, price_type, start, end, window):
     """
     if price_type not in ["ENERGY", "DEMAND"]:
         raise AttributeError("Given price type is invalid. Use ENERGY or DEMAND.")
+
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
 
     start_unix = int(start.timestamp() * 1e9)
     end_unix = int(end.timestamp() * 1e9)
@@ -359,6 +370,9 @@ def get_indoor_temperature_historic(indoor_historic_stub, building, zone, start,
     :return: pd.series valus=float, index=time
 
     """
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
+
     start_unix = int(start.timestamp() * 1e9)
     end_unix = int(end.timestamp() * 1e9)
     window_seconds = get_window_in_sec(window)
@@ -390,6 +404,9 @@ def get_actions_historic(indoor_historic_stub, building, zone, start, end, windo
     :return: pd.series valus=float, index=time
 
     """
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
+
     start_unix = int(start.timestamp() * 1e9)
     end_unix = int(end.timestamp() * 1e9)
     window_seconds = get_window_in_sec(window)
@@ -442,6 +459,8 @@ def get_indoor_temperature_prediction(indoor_temperature_prediction_stub, buildi
     :return: (float) temperature in 5 minutes after current_time in Fahrenheit.
 
     """
+    current_time = current_time.replace(microsecond=0)
+
     current_time_unix = int(current_time.timestamp() * 1e9)
 
     # call service
@@ -516,6 +535,9 @@ def get_outdoor_temperature_historic(outdoor_historic_stub, building, start, end
     :return: pd.series valus=float, index=time
 
     """
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
+
     start_unix = int(start.timestamp() * 1e9)
     end_unix = int(end.timestamp() * 1e9)
     window_seconds = get_window_in_sec(window)
@@ -563,6 +585,8 @@ def get_meter_data_historical(meter_data_stub, bldg, start, end, point_type, agg
     :param window: (str) Size of the moving window.
     :return: pd.DataFrame(), defaultdict(list) - Meter data, dictionary that maps meter data's columns (uuid's) to sites
     """
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
 
     start_utc = start.astimezone(pytz.UTC)
     end_utc = end.astimezone(pytz.UTC)

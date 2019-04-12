@@ -20,6 +20,8 @@ xbos_services_getter/lib/indoor_temperature_action_pb2.py
 xbos_services_getter/lib/indoor_temperature_action_pb2_grpc.py
 xbos_services_getter/lib/indoor_temperature_prediction_pb2.py
 xbos_services_getter/lib/indoor_temperature_prediction_pb2_grpc.py
+xbos_services_getter/lib/meter_data_historical_pb2.py
+xbos_services_getter/lib/meter_data_historical_pb2_grpc.py
 xbos_services_getter/lib/occupancy_pb2.py
 xbos_services_getter/lib/occupancy_pb2_grpc.py
 xbos_services_getter/lib/outdoor_temperature_historical_pb2.py

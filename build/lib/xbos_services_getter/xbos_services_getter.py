@@ -20,6 +20,8 @@ from xbos_services_getter.lib import indoor_temperature_prediction_pb2
 from xbos_services_getter.lib import indoor_temperature_prediction_pb2_grpc
 from xbos_services_getter.lib import building_zone_names_pb2
 from xbos_services_getter.lib import building_zone_names_pb2_grpc
+from xbos_services_getter.lib import meter_data_historical_pb2
+from xbos_services_getter.lib import meter_data_historical_pb2_grpc
 
 import datetime
 import pytz
@@ -135,6 +137,9 @@ def get_comfortband(temperature_band_stub, building, zone, start, end, window):
     :return: pd.df columns=["t_low", "t_high"], valus=float, index=time
 
     """
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
+
     start_unix = start.timestamp() * 1e9
     end_unix = end.timestamp() * 1e9
     window_seconds = get_window_in_sec(window)
@@ -168,6 +173,9 @@ def get_do_not_exceed(temperature_band_stub, building, zone, start, end, window)
     :return: pd.df columns=["t_low", "t_high"], valus=float, index=time
 
     """
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
+
     start_unix = start.timestamp() * 1e9
     end_unix = end.timestamp() * 1e9
     window_seconds = get_window_in_sec(window)
@@ -217,6 +225,8 @@ def get_occupancy(occupancy_stub, building, zone, start, end, window):
     :return: pd.series valus=float, index=time
 
     """
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
 
     start_unix = start.timestamp() * 1e9
     end_unix = end.timestamp() * 1e9
@@ -276,6 +286,9 @@ def get_price(price_stub, building, price_type, start, end, window):
     """
     if price_type not in ["ENERGY", "DEMAND"]:
         raise AttributeError("Given price type is invalid. Use ENERGY or DEMAND.")
+
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
 
     start_unix = int(start.timestamp() * 1e9)
     end_unix = int(end.timestamp() * 1e9)
@@ -357,6 +370,9 @@ def get_indoor_temperature_historic(indoor_historic_stub, building, zone, start,
     :return: pd.series valus=float, index=time
 
     """
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
+
     start_unix = int(start.timestamp() * 1e9)
     end_unix = int(end.timestamp() * 1e9)
     window_seconds = get_window_in_sec(window)
@@ -388,6 +404,9 @@ def get_actions_historic(indoor_historic_stub, building, zone, start, end, windo
     :return: pd.series valus=float, index=time
 
     """
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
+
     start_unix = int(start.timestamp() * 1e9)
     end_unix = int(end.timestamp() * 1e9)
     window_seconds = get_window_in_sec(window)
@@ -440,6 +459,8 @@ def get_indoor_temperature_prediction(indoor_temperature_prediction_stub, buildi
     :return: (float) temperature in 5 minutes after current_time in Fahrenheit.
 
     """
+    current_time = current_time.replace(microsecond=0)
+
     current_time_unix = int(current_time.timestamp() * 1e9)
 
     # call service
@@ -514,6 +535,9 @@ def get_outdoor_temperature_historic(outdoor_historic_stub, building, start, end
     :return: pd.series valus=float, index=time
 
     """
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
+
     start_unix = int(start.timestamp() * 1e9)
     end_unix = int(end.timestamp() * 1e9)
     window_seconds = get_window_in_sec(window)
@@ -531,5 +555,64 @@ def get_outdoor_temperature_historic(outdoor_historic_stub, building, start, end
         historic_outdoor_final.loc[msg_datetime] = msg.temperature
 
     return historic_outdoor_final
+
+
+
+def get_meter_data_historical_stub(METER_DATA_HISTORICAL_HOST_ADDRESS=None):
+    """ Get stub to interact with meter data service.
+    :param METER_DATA_HISTORICAL_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
+        set as environment variable.
+    :return: grpc Stub object.
+    """
+
+    if not METER_DATA_HISTORICAL_HOST_ADDRESS:
+        METER_DATA_HISTORICAL_HOST_ADDRESS = os.environ["METER_DATA_HISTORICAL_HOST_ADDRESS"]
+
+    channel = grpc.insecure_channel(METER_DATA_HISTORICAL_HOST_ADDRESS)
+    stub = meter_data_historical_pb2_grpc.MeterDataHistoricalStub(channel)
+    return stub
+
+
+def get_meter_data_historical(meter_data_stub, bldg, start, end, point_type, aggregate, window):
+    """ Get meter data as a dataframe.
+
+    :param meter_data_stub: grpc stub for meter data service.
+    :param bldg: list(str) - list of buildings.
+    :param start: datetime (timezone aware)
+    :param end: datetime (timezone aware)
+    :param point_type: (str) Building_Electric_Meter or Green_Button_Meter
+    :param aggregate: (str) Values include MEAN, MAX, MIN, COUNT, SUM and RAW (the temporal window parameter is ignored)
+    :param window: (str) Size of the moving window.
+    :return: pd.DataFrame(), defaultdict(list) - Meter data, dictionary that maps meter data's columns (uuid's) to sites
+    """
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
+
+    start_utc = start.astimezone(pytz.UTC)
+    end_utc = end.astimezone(pytz.UTC)
+    start_str = start_utc.strftime('%Y-%m-%dT%H:%M:%SZ')
+    end_str = end_utc.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+    # Create gRPC request object
+    request = meter_data_historical_pb2.Request(
+        buildings=bldg,
+        start=start_str,
+        end=end_str,
+        point_type=point_type,
+        aggregate=aggregate,
+        window=window
+    )
+
+    response = meter_data_stub.GetMeterDataHistorical(request)
+
+    df = pd.DataFrame()
+    for point in response.point:
+        df = df.append([[point.time, point.power]])
+
+    df.columns = ['datetime', 'power']
+    df.set_index('datetime', inplace=True)
+
+    return df
+
 
 
