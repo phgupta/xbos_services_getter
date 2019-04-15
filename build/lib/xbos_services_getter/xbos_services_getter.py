@@ -617,6 +617,8 @@ def get_meter_data_historical(meter_data_stub, bldg, start, end, point_type, agg
 
 def check_data(data, start, end, window, check_nan=False):
     """Checks if data has right times and optionally checks for nan.
+    This includes checking that the daterange [param:start (inculsive) - param:end (exclusive)) is included in the data.
+    And that the time-difference between datapoints equals to param:window.
 
     :param data: pd.df or pd.series
     :param start: datetime (timezone aware)

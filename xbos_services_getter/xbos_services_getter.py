@@ -624,6 +624,8 @@ def check_data(data, start, end, window, check_nan=False):
     :param start: datetime (timezone aware)
     :param end: datetime (timezone aware)
     :param window: (string)
+    :param check_nan: If False (default) will not return an error if a datapoint is Nan. If True, will error on nan
+    data points.
     :return: str err message. If no error, returns None."""
 
     window = get_window_in_sec(window)
