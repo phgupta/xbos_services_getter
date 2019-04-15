@@ -615,4 +615,27 @@ def get_meter_data_historical(meter_data_stub, bldg, start, end, point_type, agg
     return df
 
 
+def check_data(data, start, end, window, check_nan=False):
+    """Checks if data has right times and optionally checks for nan.
+
+    :param data: pd.df or pd.series
+    :param start: datetime (timezone aware)
+    :param end: datetime (timezone aware)
+    :param window: (string)
+    :return: str err message. If no error, returns None."""
+
+    window = get_window_in_sec(window)
+    if not isinstance(data, pd.DataFrame) and not isinstance(data, pd.Series):
+        return "Is not a pd.DataFrame/pd.Series"
+    if (start not in data.index) or ((end - datetime.timedelta(seconds=window)) not in data.index):
+        return "Does not have valid start or/and end time."
+    if check_nan and (data.isna().values.any()):
+        return "Nan values in data."
+    time_diffs = data.index.to_series(keep_tz=True).diff()
+    if (time_diffs.shape[0] > 1) and ((time_diffs.min() != time_diffs.max()) or (time_diffs.min().seconds != window)):
+        return "Missing rows or/and bad time frequency."
+    return None
+
+
+
 
