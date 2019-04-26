@@ -22,6 +22,8 @@ from xbos_services_getter.lib import building_zone_names_pb2
 from xbos_services_getter.lib import building_zone_names_pb2_grpc
 from xbos_services_getter.lib import meter_data_historical_pb2
 from xbos_services_getter.lib import meter_data_historical_pb2_grpc
+from xbos_services_getter.lib import optimizer_pb2
+from xbos_services_getter.lib import optimizer_pb2_grpc
 
 import datetime
 import pytz
@@ -565,7 +567,7 @@ def get_meter_data_historical_stub(METER_DATA_HISTORICAL_HOST_ADDRESS=None):
     :return: grpc Stub object.
     """
 
-    if not METER_DATA_HISTORICAL_HOST_ADDRESS:
+    if METER_DATA_HISTORICAL_HOST_ADDRESS is None:
         METER_DATA_HISTORICAL_HOST_ADDRESS = os.environ["METER_DATA_HISTORICAL_HOST_ADDRESS"]
 
     channel = grpc.insecure_channel(METER_DATA_HISTORICAL_HOST_ADDRESS)
@@ -627,19 +629,69 @@ def check_data(data, start, end, window, check_nan=False):
     :param check_nan: If False (default) will not return an error if a datapoint is Nan. If True, will error on nan
     data points.
     :return: str err message. If no error, returns None."""
-
-    window = get_window_in_sec(window)
     if not isinstance(data, pd.DataFrame) and not isinstance(data, pd.Series):
         return "Is not a pd.DataFrame/pd.Series"
+
+    window = get_window_in_sec(window)
+    time_diffs = data.index.to_series(keep_tz=True).diff()
+    if (time_diffs.shape[0] > 1) and ((time_diffs.min() != time_diffs.max()) or (time_diffs.min().seconds != window)):
+        return "Missing rows or/and bad time frequency."
     if (start not in data.index) or ((end - datetime.timedelta(seconds=window)) not in data.index):
         return "Does not have valid start or/and end time."
     if check_nan and (data.isna().values.any()):
         return "Nan values in data."
-    time_diffs = data.index.to_series(keep_tz=True).diff()
-    if (time_diffs.shape[0] > 1) and ((time_diffs.min() != time_diffs.max()) or (time_diffs.min().seconds != window)):
-        return "Missing rows or/and bad time frequency."
     return None
 
 
+def get_optimizer_stub(OPTIMIZER_HOST_ADDRESS=None):
+    """ Get stub to interact with optimizer service.
+    :param OPTIMIZER_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
+        set as environment variable.
+    :return: grpc Stub object.
+    """
+
+    if OPTIMIZER_HOST_ADDRESS is None:
+        OPTIMIZER_HOST_ADDRESS = os.environ["OPTIMIZER_HOST_ADDRESS"]
+
+    channel = grpc.insecure_channel(OPTIMIZER_HOST_ADDRESS)
+    stub = optimizer_pb2_grpc.OptimizerStub(channel)
+    return stub
+
+
+def get_mpc_optimization(optimizer_stub, building, zones, start, end, window, lambda_val, starting_temperatures,
+                         unit="F"):
+    """Get the optimal actions according to MPC optimization.
+
+    :param optimizer_stub: grpc stub for optimizer service
+    :param building: (str) building name
+    :param zones: (list str) zones names
+    :param start: datetime (timezone aware)
+    :param end: datetime (timezone aware)
+    :param window: (str) the intervals in which to optimize
+    :param lambda_val: (float) between 0 and 1. The lambda value to balance cost and discomfort.
+    :param starting_temperatures: (dict) {str zone: float temperature} the starting temperatures of all zones in
+        given building.
+    :param unit: (string) the unit of the temperature.
+    :return: (dict {(str) zone: (int) action) the optimal actions to take
+    """
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
+
+    start_unix = int(start.timestamp() * 1e9)
+    end_unix = int(end.timestamp() * 1e9)
+
+    # call service
+    optimizer_response = optimizer_stub.GetMPCOptimization(
+        optimizer_pb2.MPCOptimizationRequest(
+            building=building,
+            zones=zones,
+            start=int(start_unix),
+            end=int(end_unix),
+            window=window,
+            lambda_val=lambda_val,
+            starting_temperatures=starting_temperatures,
+            unit=unit))
+
+    return {iter_zone: optimizer_response.actions[iter_zone] for iter_zone in zones}
 
 
