@@ -15,7 +15,7 @@ class MeterDataHistoricalStub(object):
       channel: A grpc.Channel.
     """
     self.GetMeterDataHistorical = channel.unary_unary(
-        '/meter_data.MeterDataHistorical/GetMeterDataHistorical',
+        '/meter_data_historical.MeterDataHistorical/GetMeterDataHistorical',
         request_serializer=meter__data__historical__pb2.Request.SerializeToString,
         response_deserializer=meter__data__historical__pb2.Reply.FromString,
         )
@@ -43,5 +43,5 @@ def add_MeterDataHistoricalServicer_to_server(servicer, server):
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
-      'meter_data.MeterDataHistorical', rpc_method_handlers)
+      'meter_data_historical.MeterDataHistorical', rpc_method_handlers)
   server.add_generic_rpc_handlers((generic_handler,))

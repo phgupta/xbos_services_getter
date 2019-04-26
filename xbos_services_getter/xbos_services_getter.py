@@ -590,16 +590,15 @@ def get_meter_data_historical(meter_data_stub, bldg, start, end, point_type, agg
     start = start.replace(microsecond=0)
     end = end.replace(microsecond=0)
 
-    start_utc = start.astimezone(pytz.UTC)
-    end_utc = end.astimezone(pytz.UTC)
-    start_str = start_utc.strftime('%Y-%m-%dT%H:%M:%SZ')
-    end_str = end_utc.strftime('%Y-%m-%dT%H:%M:%SZ')
+    start_unix = int(start.timestamp() * 1e9)
+    end_unix = int(end.timestamp() * 1e9)
+    window_seconds = get_window_in_sec(window)
 
     # Create gRPC request object
     request = meter_data_historical_pb2.Request(
         building=bldg,
-        start=start_str,
-        end=end_str,
+        start=int(start_unix),
+        end=int(end_unix),
         point_type=point_type,
         aggregate=aggregate,
         window=window
