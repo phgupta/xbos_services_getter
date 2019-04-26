@@ -597,7 +597,7 @@ def get_meter_data_historical(meter_data_stub, bldg, start, end, point_type, agg
 
     # Create gRPC request object
     request = meter_data_historical_pb2.Request(
-        buildings=bldg,
+        building=bldg,
         start=start_str,
         end=end_str,
         point_type=point_type,
