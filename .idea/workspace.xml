@@ -3,12 +3,11 @@
   <component name="ChangeListManager">
     <list default="true" id="a8c8b272-5671-4015-88e3-646a30b220bc" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/lib/xbos_services_getter/lib/indoor_temperature_action_pb2.py" beforeDir="false" afterPath="$PROJECT_DIR$/build/lib/xbos_services_getter/lib/indoor_temperature_action_pb2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/lib/xbos_services_getter/lib/indoor_temperature_action_pb2_grpc.py" beforeDir="false" afterPath="$PROJECT_DIR$/build/lib/xbos_services_getter/lib/indoor_temperature_action_pb2_grpc.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/lib/xbos_services_getter/xbos_services_getter.py" beforeDir="false" afterPath="$PROJECT_DIR$/build/lib/xbos_services_getter/xbos_services_getter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/xbos_services_getter.egg-info/PKG-INFO" beforeDir="false" afterPath="$PROJECT_DIR$/xbos_services_getter.egg-info/PKG-INFO" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/xbos_services_getter/example/xbos-getter-example.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/xbos_services_getter/example/xbos-getter-example.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/xbos_services_getter/lib/indoor_temperature_prediction_pb2.py" beforeDir="false" afterPath="$PROJECT_DIR$/xbos_services_getter/lib/indoor_temperature_prediction_pb2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/xbos_services_getter/lib/indoor_temperature_prediction_pb2_grpc.py" beforeDir="false" afterPath="$PROJECT_DIR$/xbos_services_getter/lib/indoor_temperature_prediction_pb2_grpc.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/xbos_services_getter/xbos_services_getter.py" beforeDir="false" afterPath="$PROJECT_DIR$/xbos_services_getter/xbos_services_getter.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -37,32 +36,33 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="282" />
+          <entry key="py" value="534" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="282" />
+          <entry key="Python" value="534" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/xbos_services_getter/xbos_services_getter.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="473">
-              <caret line="453" lean-forward="true" selection-start-line="453" selection-end-line="453" />
+            <state relative-caret-position="455">
+              <caret line="538" column="4" selection-start-line="538" selection-start-column="4" selection-end-line="538" selection-end-column="4" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
-                <marker date="1556525675249" expanded="true" signature="19132:19135" ph="..." />
+                <marker date="1556579992892" expanded="true" signature="19132:19135" ph="..." />
+                <marker date="1556579992892" expanded="true" signature="21838:22918" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/setup.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="165">
@@ -79,6 +79,7 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>action</find>
+      <find>price</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -87,8 +88,8 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/xbos_services_getter/xbos_services_getter.py" />
         <option value="$PROJECT_DIR$/setup.py" />
+        <option value="$PROJECT_DIR$/xbos_services_getter/xbos_services_getter.py" />
       </list>
     </option>
   </component>
@@ -191,23 +192,24 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/xbos_services_getter/xbos_services_getter.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="473">
-          <caret line="453" lean-forward="true" selection-start-line="453" selection-end-line="453" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-            <marker date="1556525675249" expanded="true" signature="19132:19135" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/setup.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="165">
           <caret line="11" column="23" selection-start-line="11" selection-start-column="23" selection-end-line="11" selection-end-column="23" />
           <folding>
             <element signature="e#0#43#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/xbos_services_getter/xbos_services_getter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="455">
+          <caret line="538" column="4" selection-start-line="538" selection-start-column="4" selection-end-line="538" selection-end-column="4" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+            <marker date="1556579992892" expanded="true" signature="19132:19135" ph="..." />
+            <marker date="1556579992892" expanded="true" signature="21838:22918" ph="..." />
           </folding>
         </state>
       </provider>
