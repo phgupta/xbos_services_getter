@@ -428,6 +428,41 @@ def get_actions_historic(indoor_historic_stub, building, zone, start, end, windo
     return historic_action_final
 
 
+def get_temperature_band_historic(indoor_historic_stub, building, zone, start, end, window):
+    """Gets historic setpoints temperature as pd.df.
+
+    :param indoor_historic_stub: grpc stub for historic indoor temperature microservice
+    :param building: (str) building name
+    :param zone: (str) zone name
+    :param start: (datetime timezone aware)
+    :param end: (datetime timezone aware)
+    :param window: (str) the interval in which to split the data.
+    :return: pd.df columns=["t_low", "t_high"] valus=float, index=time
+
+    """
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
+
+    start_unix = int(start.timestamp() * 1e9)
+    end_unix = int(end.timestamp() * 1e9)
+    window_seconds = get_window_in_sec(window)
+
+    # call service
+    historic_temperature_band_response = indoor_historic_stub.GetRawTemperatureBands(
+        indoor_temperature_action_pb2.Request(building=building, zone=zone, start=start_unix, end=end_unix,
+                                              window=window))
+
+    # process data
+    historic_action_final = pd.DataFrame(columns=["t_low", "t_high"], index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    for msg in historic_temperature_band_response.actions:
+        msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
+            tz=start.tzinfo)
+        historic_action_final.loc[msg_datetime]["t_high"] = msg.temperature_high
+        historic_action_final.loc[msg_datetime]["t_low"] = msg.temperature_low
+
+    return historic_action_final
+
+
 # indoor historic functions
 def get_indoor_temperature_prediction_stub(INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS=None):
     """Get the stub to interact with the indoor_temperature_prediction service.
@@ -557,7 +592,6 @@ def get_outdoor_temperature_historic(outdoor_historic_stub, building, start, end
         historic_outdoor_final.loc[msg_datetime] = msg.temperature
 
     return historic_outdoor_final
-
 
 
 def get_meter_data_historical_stub(METER_DATA_HISTORICAL_HOST_ADDRESS=None):
