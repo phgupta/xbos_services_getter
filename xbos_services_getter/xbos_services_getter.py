@@ -536,7 +536,7 @@ def get_indoor_temperature_prediction_error(indoor_temperature_prediction_stub, 
                                               start=start_unix,
                                               end=end_unix,
                                               unit=temperature_unit))
-    
+
     return error_response.mean, error_response.var
 
 # HVAC Consumption functions
