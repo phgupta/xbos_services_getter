@@ -511,6 +511,33 @@ def get_indoor_temperature_prediction(indoor_temperature_prediction_stub, buildi
 
     return indoor_prediction_response.temperature
 
+def get_indoor_temperature_prediction_error(indoor_temperature_prediction_stub, building, zone, action, start, end,
+                                            temperature_unit="F"):
+    """Gets mean and var of the error of indoor temperature predictions.
+
+    :param indoor_temperature_prediction_stub: grpc stub for prediction of indoor temperature microservice
+    :param building: (str) building name
+    :param zone: (str) zone name
+    :param action: (int) Action as given in utils file.
+    :param start: (datetime timezone aware)
+    :param end: (datetime timezone aware)
+    :param temperature_unit: temperature unit
+    :return:
+    """
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
+
+    start_unix = int(start.timestamp() * 1e9)
+    end_unix = int(end.timestamp() * 1e9)
+
+    # call service
+    error_response = indoor_temperature_prediction_stub.GetSecondOrderError(
+        indoor_temperature_prediction_pb2.ErrorRequest(building=building, zone=zone, action=action,
+                                              start=start_unix,
+                                              end=end_unix,
+                                              unit=temperature_unit))
+
+    return error_response.mean, error_response.var
 
 # HVAC Consumption functions
 def get_hvac_consumption_stub(HVAC_CONSUMPTION_HOST_ADDRESS=None):

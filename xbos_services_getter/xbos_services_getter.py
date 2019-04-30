@@ -511,19 +511,24 @@ def get_indoor_temperature_prediction(indoor_temperature_prediction_stub, buildi
 
     return indoor_prediction_response.temperature
 
-def get_indoor_temperature_prediction_error(indoor_temperature_prediction_stub, building, zone, action, start, end,
+def get_indoor_temperature_prediction_error(indoor_temperature_prediction_stub, building, zone, action, start=None, end=None,
                                             temperature_unit="F"):
     """Gets mean and var of the error of indoor temperature predictions.
 
     :param indoor_temperature_prediction_stub: grpc stub for prediction of indoor temperature microservice
     :param building: (str) building name
     :param zone: (str) zone name
-    :param action: (int) Action as given in utils file.
-    :param start: (datetime timezone aware)
-    :param end: (datetime timezone aware)
+    :param action: (int) Action as given in utils file. Specifies for which action to get the error. -1 gets the error
+        on the whole dataset, regardless of action.
+    :param start: (datetime timezone aware). If None, get the training error.
+    :param end: (datetime timezone aware). If None, get the training error.
     :param temperature_unit: temperature unit
     :return:
     """
+    if (start is None) or (end is None):
+        end = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+        start = end - datetime.timedelta(hours=24)
+
     start = start.replace(microsecond=0)
     end = end.replace(microsecond=0)
 

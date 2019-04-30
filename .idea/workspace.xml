@@ -3,8 +3,12 @@
   <component name="ChangeListManager">
     <list default="true" id="a8c8b272-5671-4015-88e3-646a30b220bc" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/lib/xbos_services_getter/lib/indoor_temperature_prediction_pb2.py" beforeDir="false" afterPath="$PROJECT_DIR$/build/lib/xbos_services_getter/lib/indoor_temperature_prediction_pb2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/lib/xbos_services_getter/lib/indoor_temperature_prediction_pb2_grpc.py" beforeDir="false" afterPath="$PROJECT_DIR$/build/lib/xbos_services_getter/lib/indoor_temperature_prediction_pb2_grpc.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/lib/xbos_services_getter/xbos_services_getter.py" beforeDir="false" afterPath="$PROJECT_DIR$/build/lib/xbos_services_getter/xbos_services_getter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/req.txt" beforeDir="false" afterPath="$PROJECT_DIR$/req.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xbos_services_getter/example/.ipynb_checkpoints/xbos-getter-example-checkpoint.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/xbos_services_getter/example/.ipynb_checkpoints/xbos-getter-example-checkpoint.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/xbos_services_getter.egg-info/PKG-INFO" beforeDir="false" afterPath="$PROJECT_DIR$/xbos_services_getter.egg-info/PKG-INFO" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/xbos_services_getter/example/xbos-getter-example.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/xbos_services_getter/example/xbos-getter-example.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/xbos_services_getter/xbos_services_getter.py" beforeDir="false" afterPath="$PROJECT_DIR$/xbos_services_getter/xbos_services_getter.py" afterDir="false" />
     </list>
@@ -25,21 +29,25 @@
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="py" value="2" />
+          <entry key="txt" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
+          <entry key="PLAIN_TEXT" value="1" />
           <entry key="Python" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="536" />
+          <entry key="py" value="862" />
+          <entry key="txt" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="536" />
+          <entry key="PLAIN_TEXT" value="1" />
+          <entry key="Python" value="862" />
         </counts>
       </usages-collector>
     </session>
@@ -49,18 +57,18 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/xbos_services_getter/xbos_services_getter.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="449">
-              <caret line="537" column="67" selection-start-line="537" selection-start-column="51" selection-end-line="537" selection-end-column="67" />
+            <state relative-caret-position="-2351">
+              <caret line="521" column="51" selection-start-line="521" selection-start-column="51" selection-end-line="521" selection-end-column="51" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
-                <marker date="1556580440293" expanded="true" signature="19132:19135" ph="..." />
-                <marker date="1556580440293" expanded="true" signature="21838:22914" ph="..." />
+                <marker date="1556583588418" expanded="true" signature="19132:19135" ph="..." />
+                <marker date="1556583588418" expanded="true" signature="21848:23266" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/setup.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="165">
@@ -68,6 +76,15 @@
               <folding>
                 <element signature="e#0#43#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/req.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="15">
+              <caret line="1" column="6" selection-start-line="1" selection-start-column="6" selection-end-line="1" selection-end-column="6" />
             </state>
           </provider>
         </entry>
@@ -89,6 +106,7 @@
       <list>
         <option value="$PROJECT_DIR$/xbos_services_getter/xbos_services_getter.py" />
         <option value="$PROJECT_DIR$/setup.py" />
+        <option value="$PROJECT_DIR$/req.txt" />
       </list>
     </option>
   </component>
@@ -98,7 +116,7 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6" fullScreen="true">
+  <component name="ProjectFrameBounds" fullScreen="true">
     <option name="width" value="1920" />
     <option name="height" value="1080" />
   </component>
@@ -158,11 +176,11 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1440" height="900" extended-state="6" />
+    <frame x="0" y="0" width="1680" height="1050" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Favorites" side_tool="true" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24964234" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.21306472" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Docker" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" show_stripe_button="false" />
@@ -193,12 +211,12 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/xbos_services_getter/xbos_services_getter.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="449">
-          <caret line="537" column="67" selection-start-line="537" selection-start-column="51" selection-end-line="537" selection-end-column="67" />
+        <state relative-caret-position="-2351">
+          <caret line="521" column="51" selection-start-line="521" selection-start-column="51" selection-end-line="521" selection-end-column="51" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
-            <marker date="1556580440293" expanded="true" signature="19132:19135" ph="..." />
-            <marker date="1556580440293" expanded="true" signature="21838:22914" ph="..." />
+            <marker date="1556583588418" expanded="true" signature="19132:19135" ph="..." />
+            <marker date="1556583588418" expanded="true" signature="21848:23266" ph="..." />
           </folding>
         </state>
       </provider>
@@ -210,6 +228,13 @@
           <folding>
             <element signature="e#0#43#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/req.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="1" column="6" selection-start-line="1" selection-start-column="6" selection-end-line="1" selection-end-column="6" />
         </state>
       </provider>
     </entry>
