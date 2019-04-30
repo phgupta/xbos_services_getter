@@ -428,7 +428,7 @@ def get_actions_historic(indoor_historic_stub, building, zone, start, end, windo
     return historic_action_final
 
 
-def get_temperature_band_historic(indoor_historic_stub, building, zone, start, end, window):
+def get_setpoints_historic(indoor_historic_stub, building, zone, start, end, window):
     """Gets historic setpoints temperature as pd.df.
 
     :param indoor_historic_stub: grpc stub for historic indoor temperature microservice
@@ -448,19 +448,19 @@ def get_temperature_band_historic(indoor_historic_stub, building, zone, start, e
     window_seconds = get_window_in_sec(window)
 
     # call service
-    historic_temperature_band_response = indoor_historic_stub.GetRawTemperatureBands(
+    historic_setpoints_response = indoor_historic_stub.GetRawTemperatureBands(
         indoor_temperature_action_pb2.Request(building=building, zone=zone, start=start_unix, end=end_unix,
                                               window=window))
 
     # process data
-    historic_action_final = pd.DataFrame(columns=["t_low", "t_high"], index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
-    for msg in historic_temperature_band_response.actions:
+    historic_setpoints_final = pd.DataFrame(columns=["t_low", "t_high"], index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    for msg in historic_setpoints_response.setpoints:
         msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
             tz=start.tzinfo)
-        historic_action_final.loc[msg_datetime]["t_high"] = msg.temperature_high
-        historic_action_final.loc[msg_datetime]["t_low"] = msg.temperature_low
+        historic_setpoints_final.loc[msg_datetime]["t_high"] = msg.temperature_high
+        historic_setpoints_final.loc[msg_datetime]["t_low"] = msg.temperature_low
 
-    return historic_action_final
+    return historic_setpoints_final
 
 
 # indoor historic functions
