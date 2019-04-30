@@ -263,6 +263,18 @@ def get_price_stub(PRICE_HOST_ADDRESS=None):
     price_channel = grpc.insecure_channel(PRICE_HOST_ADDRESS)
     return price_pb2_grpc.PriceStub(price_channel)
 
+def get_all_tariffs(price_stub):
+    """Gets all available tariffs and utilities as a list of dictionaries.
+
+    :param price_stub: grpc stub for price microservice
+    :return: list of (dictionary) keys=["tariff", "utility"]
+
+    """
+    all_tariffs_utilities = price_stub.GetAllTariffsAndUtilities(price_pb2.Empty()).tariffs_utilities
+    all_tariffs_utilities_list = []
+    for tariff_and_utility in all_tariffs_utilities:
+        all_tariffs_utilities_list.append({"tariff": tariff_and_utility.tariff, "utility": tariff_and_utility.utility})
+    return all_tariffs_utilities_list
 
 def get_tariff_and_utility(price_stub, building):
     """Gets the tariff and utility for the given building as a dictionary.
@@ -275,7 +287,7 @@ def get_tariff_and_utility(price_stub, building):
     return {"tariff": tariff_and_utility.tariff, "utility": tariff_and_utility.utility}
 
 
-def get_price(price_stub, building, price_type, start, end, window):
+def get_price_utility_tariff(price_stub,utility,tariff,price_type, start, end, window):
     """Gets the price as a pandas dataframe.
 
     :param price_stub: grpc stub for price microservice
@@ -297,23 +309,37 @@ def get_price(price_stub, building, price_type, start, end, window):
     window_seconds = get_window_in_sec(window)
 
     # call service
-    tariff_and_utility = get_tariff_and_utility(price_stub, building)
-    price_response = price_stub.GetPrice(price_pb2.PriceRequest(utility=tariff_and_utility["utility"],
-                                                       tariff=tariff_and_utility["tariff"],
+    price_response = price_stub.GetPrice(price_pb2.PriceRequest(utility=utility,
+                                                       tariff=tariff,
                                                        price_type=price_type,
                                                        start=start_unix,
                                                        end=end_unix,
                                                        window=window))
-
     # process data
     price_final = pd.DataFrame(columns=["price", "unit"], index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
     for msg in price_response.prices:
-        msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
-            tz=start.tzinfo)
+        msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo)
         price_final.loc[msg_datetime]["price"] = msg.price
         price_final.loc[msg_datetime]["unit"] = msg.unit
 
     return price_final
+
+
+def get_price(price_stub, building, price_type, start, end, window):
+    """Gets the price as a pandas dataframe.
+
+    :param price_stub: grpc stub for price microservice
+    :param building: (str) building name
+    :param price_type: (str) "ENERGY" or "DEMAND"
+    :param start: (datetime timezone aware)
+    :param end: (datetime timezone aware)
+    :param window: (str) the interval in which to split the data.
+    :return: pd.DataFrame columns=["price" (float), "unit" string] index=start to end with window intervals.
+    """
+
+    # call service
+    tariff_and_utility = get_tariff_and_utility(price_stub, building)
+    return get_price_utility_tariff(price_stub,tariff_and_utility["utility"],tariff_and_utility["tariff"],price_type, start, end, window)
 
 
 # discomfort functions
@@ -670,17 +696,14 @@ def get_meter_data_historical(meter_data_stub, bldg, start, end, point_type, agg
         window=window
     )
 
-    response = meter_data_stub.GetMeterDataHistorical(request)
+    historic_meter_data_response = meter_data_stub.GetMeterDataHistorical(request)
 
-    df = pd.DataFrame()
-    for point in response.point:
-        df = df.append([[point.time, point.power]])
-
-    df.columns = ['datetime', 'power']
-    df.set_index('datetime', inplace=True)
-
-    return df
-
+    historic_meter_data_final = pd.Series(index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    for msg in historic_meter_data_response.point:
+        msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
+            tz=start.tzinfo)
+        historic_meter_data_final.loc[msg_datetime] = msg.power
+    return historic_meter_data_final
 
 def check_data(data, start, end, window, check_nan=False):
     """Checks if data has right times and optionally checks for nan.
@@ -758,5 +781,3 @@ def get_mpc_optimization(optimizer_stub, building, zones, start, end, window, la
             unit=unit))
 
     return {iter_zone: optimizer_response.actions[iter_zone] for iter_zone in zones}
-
-
