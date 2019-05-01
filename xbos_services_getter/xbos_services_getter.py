@@ -64,7 +64,8 @@ def get_building_zone_names_stub(BUILDING_ZONE_NAMES_HOST_ADDRESS=None):
     if BUILDING_ZONE_NAMES_HOST_ADDRESS is None:
         BUILDING_ZONE_NAMES_HOST_ADDRESS = os.environ["BUILDING_ZONE_NAMES_HOST_ADDRESS"]
 
-    channel = grpc.insecure_channel(BUILDING_ZONE_NAMES_HOST_ADDRESS)
+    credentials = grpc.ssl_channel_credentials()
+    channel = grpc.secure_channel(BUILDING_ZONE_NAMES_HOST_ADDRESS, credentials)
     stub = building_zone_names_pb2_grpc.BuildingZoneNamesStub(channel)
     return stub
 
@@ -122,7 +123,8 @@ def get_temperature_band_stub(TEMPERATURE_BANDS_HOST_ADDRESS=None):
     if TEMPERATURE_BANDS_HOST_ADDRESS is None:
         TEMPERATURE_BANDS_HOST_ADDRESS = os.environ["TEMPERATURE_BANDS_HOST_ADDRESS"]
 
-    temperature_band_channel = grpc.insecure_channel(TEMPERATURE_BANDS_HOST_ADDRESS)
+    credentials = grpc.ssl_channel_credentials()
+    temperature_band_channel = grpc.secure_channel(TEMPERATURE_BANDS_HOST_ADDRESS, credentials)
     temperature_band_stub = schedules_pb2_grpc.SchedulesStub(temperature_band_channel)
     return temperature_band_stub
 
@@ -211,7 +213,8 @@ def get_occupancy_stub(OCCUPANCY_HOST_ADDRESS=None):
     if OCCUPANCY_HOST_ADDRESS is None:
         OCCUPANCY_HOST_ADDRESS = os.environ["OCCUPANCY_HOST_ADDRESS"]
 
-    occupancy_channel = grpc.insecure_channel(OCCUPANCY_HOST_ADDRESS)
+    credentials = grpc.ssl_channel_credentials()
+    occupancy_channel = grpc.secure_channel(OCCUPANCY_HOST_ADDRESS, credentials)
     return occupancy_pb2_grpc.OccupancyStub(occupancy_channel)
 
 
@@ -260,7 +263,8 @@ def get_price_stub(PRICE_HOST_ADDRESS=None):
     if PRICE_HOST_ADDRESS is None:
         PRICE_HOST_ADDRESS = os.environ["PRICE_HOST_ADDRESS"]
 
-    price_channel = grpc.insecure_channel(PRICE_HOST_ADDRESS)
+    credentials = grpc.ssl_channel_credentials()
+    price_channel = grpc.secure_channel(PRICE_HOST_ADDRESS, credentials)
     return price_pb2_grpc.PriceStub(price_channel)
 
 def get_all_tariffs(price_stub):
@@ -355,7 +359,8 @@ def get_discomfort_stub(DISCOMFORT_HOST_ADDRESS=None):
     if DISCOMFORT_HOST_ADDRESS is None:
         DISCOMFORT_HOST_ADDRESS = os.environ["DISCOMFORT_HOST_ADDRESS"]
 
-    discomfort_channel = grpc.insecure_channel(DISCOMFORT_HOST_ADDRESS)
+    credentials = grpc.ssl_channel_credentials()
+    discomfort_channel = grpc.secure_channel(DISCOMFORT_HOST_ADDRESS, credentials)
     return discomfort_pb2_grpc.DiscomfortStub(discomfort_channel)
 
 
@@ -382,7 +387,8 @@ def get_indoor_historic_stub(INDOOR_DATA_HISTORICAL_HOST_ADDRESS=None):
     if INDOOR_DATA_HISTORICAL_HOST_ADDRESS is None:
         INDOOR_DATA_HISTORICAL_HOST_ADDRESS = os.environ["INDOOR_DATA_HISTORICAL_HOST_ADDRESS"]
 
-    indoor_historic_channel = grpc.insecure_channel(INDOOR_DATA_HISTORICAL_HOST_ADDRESS)
+    credentials = grpc.ssl_channel_credentials()
+    indoor_historic_channel = grpc.secure_channel(INDOOR_DATA_HISTORICAL_HOST_ADDRESS, credentials)
     return indoor_temperature_action_pb2_grpc.IndoorTemperatureActionStub(indoor_historic_channel)
 
 
@@ -502,7 +508,8 @@ def get_indoor_temperature_prediction_stub(INDOOR_TEMPERATURE_PREDICTION_HOST_AD
     if INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS is None:
         INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS = os.environ["INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS"]
 
-    indoor_temperature_prediction_channel = grpc.insecure_channel(INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS)
+    credentials = grpc.ssl_channel_credentials()
+    indoor_temperature_prediction_channel = grpc.secure_channel(INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS, credentials)
     return indoor_temperature_prediction_pb2_grpc.IndoorTemperaturePredictionStub(indoor_temperature_prediction_channel)
 
 
@@ -578,7 +585,8 @@ def get_hvac_consumption_stub(HVAC_CONSUMPTION_HOST_ADDRESS=None):
     if HVAC_CONSUMPTION_HOST_ADDRESS is None:
         HVAC_CONSUMPTION_HOST_ADDRESS = os.environ["HVAC_CONSUMPTION_HOST_ADDRESS"]
 
-    hvac_consumption_channel = grpc.insecure_channel(HVAC_CONSUMPTION_HOST_ADDRESS)
+    credentials = grpc.ssl_channel_credentials()
+    hvac_consumption_channel = grpc.secure_channel(HVAC_CONSUMPTION_HOST_ADDRESS, credentials)
     return hvac_consumption_pb2_grpc.ConsumptionHVACStub(hvac_consumption_channel)
 
 
@@ -609,7 +617,8 @@ def get_outdoor_historic_stub(OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS=None):
     if OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS is None:
         OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS = os.environ["OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS"]
 
-    outdoor_historic_channel = grpc.insecure_channel(OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS)
+    credentials = grpc.ssl_channel_credentials()
+    outdoor_historic_channel = grpc.secure_channel(OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS, credentials)
     return outdoor_temperature_historical_pb2_grpc.OutdoorTemperatureStub(outdoor_historic_channel)
 
 
