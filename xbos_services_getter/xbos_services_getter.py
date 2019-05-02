@@ -10,8 +10,8 @@ from xbos_services_getter.lib import occupancy_pb2
 from xbos_services_getter.lib import occupancy_pb2_grpc
 from xbos_services_getter.lib import outdoor_temperature_historical_pb2
 from xbos_services_getter.lib import outdoor_temperature_historical_pb2_grpc
-# from xbos_services_getter.lib import outdoor_temperature_prediction_pb2
-# from xbos_services_getter.lib import outdoor_temperature_prediction_pb2_grpc
+from xbos_services_getter.lib import outdoor_temperature_prediction_pb2
+from xbos_services_getter.lib import outdoor_temperature_prediction_pb2_grpc
 from xbos_services_getter.lib import price_pb2
 from xbos_services_getter.lib import price_pb2_grpc
 from xbos_services_getter.lib import schedules_pb2
@@ -64,7 +64,8 @@ def get_building_zone_names_stub(BUILDING_ZONE_NAMES_HOST_ADDRESS=None):
     if BUILDING_ZONE_NAMES_HOST_ADDRESS is None:
         BUILDING_ZONE_NAMES_HOST_ADDRESS = os.environ["BUILDING_ZONE_NAMES_HOST_ADDRESS"]
 
-    channel = grpc.insecure_channel(BUILDING_ZONE_NAMES_HOST_ADDRESS)
+    credentials = grpc.ssl_channel_credentials()
+    channel = grpc.secure_channel(BUILDING_ZONE_NAMES_HOST_ADDRESS, credentials)
     stub = building_zone_names_pb2_grpc.BuildingZoneNamesStub(channel)
     return stub
 
@@ -122,7 +123,8 @@ def get_temperature_band_stub(TEMPERATURE_BANDS_HOST_ADDRESS=None):
     if TEMPERATURE_BANDS_HOST_ADDRESS is None:
         TEMPERATURE_BANDS_HOST_ADDRESS = os.environ["TEMPERATURE_BANDS_HOST_ADDRESS"]
 
-    temperature_band_channel = grpc.insecure_channel(TEMPERATURE_BANDS_HOST_ADDRESS)
+    credentials = grpc.ssl_channel_credentials()
+    temperature_band_channel = grpc.secure_channel(TEMPERATURE_BANDS_HOST_ADDRESS, credentials)
     temperature_band_stub = schedules_pb2_grpc.SchedulesStub(temperature_band_channel)
     return temperature_band_stub
 
@@ -211,7 +213,8 @@ def get_occupancy_stub(OCCUPANCY_HOST_ADDRESS=None):
     if OCCUPANCY_HOST_ADDRESS is None:
         OCCUPANCY_HOST_ADDRESS = os.environ["OCCUPANCY_HOST_ADDRESS"]
 
-    occupancy_channel = grpc.insecure_channel(OCCUPANCY_HOST_ADDRESS)
+    credentials = grpc.ssl_channel_credentials()
+    occupancy_channel = grpc.secure_channel(OCCUPANCY_HOST_ADDRESS, credentials)
     return occupancy_pb2_grpc.OccupancyStub(occupancy_channel)
 
 
@@ -260,7 +263,8 @@ def get_price_stub(PRICE_HOST_ADDRESS=None):
     if PRICE_HOST_ADDRESS is None:
         PRICE_HOST_ADDRESS = os.environ["PRICE_HOST_ADDRESS"]
 
-    price_channel = grpc.insecure_channel(PRICE_HOST_ADDRESS)
+    credentials = grpc.ssl_channel_credentials()
+    price_channel = grpc.secure_channel(PRICE_HOST_ADDRESS, credentials)
     return price_pb2_grpc.PriceStub(price_channel)
 
 def get_all_tariffs(price_stub):
@@ -355,7 +359,8 @@ def get_discomfort_stub(DISCOMFORT_HOST_ADDRESS=None):
     if DISCOMFORT_HOST_ADDRESS is None:
         DISCOMFORT_HOST_ADDRESS = os.environ["DISCOMFORT_HOST_ADDRESS"]
 
-    discomfort_channel = grpc.insecure_channel(DISCOMFORT_HOST_ADDRESS)
+    credentials = grpc.ssl_channel_credentials()
+    discomfort_channel = grpc.secure_channel(DISCOMFORT_HOST_ADDRESS, credentials)
     return discomfort_pb2_grpc.DiscomfortStub(discomfort_channel)
 
 
@@ -382,7 +387,8 @@ def get_indoor_historic_stub(INDOOR_DATA_HISTORICAL_HOST_ADDRESS=None):
     if INDOOR_DATA_HISTORICAL_HOST_ADDRESS is None:
         INDOOR_DATA_HISTORICAL_HOST_ADDRESS = os.environ["INDOOR_DATA_HISTORICAL_HOST_ADDRESS"]
 
-    indoor_historic_channel = grpc.insecure_channel(INDOOR_DATA_HISTORICAL_HOST_ADDRESS)
+    credentials = grpc.ssl_channel_credentials()
+    indoor_historic_channel = grpc.secure_channel(INDOOR_DATA_HISTORICAL_HOST_ADDRESS, credentials)
     return indoor_temperature_action_pb2_grpc.IndoorTemperatureActionStub(indoor_historic_channel)
 
 
@@ -489,7 +495,7 @@ def get_setpoints_historic(indoor_historic_stub, building, zone, start, end, win
     return historic_setpoints_final
 
 
-# indoor historic functions
+# indoor prediction functions
 def get_indoor_temperature_prediction_stub(INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS=None):
     """Get the stub to interact with the indoor_temperature_prediction service.
 
@@ -502,7 +508,8 @@ def get_indoor_temperature_prediction_stub(INDOOR_TEMPERATURE_PREDICTION_HOST_AD
     if INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS is None:
         INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS = os.environ["INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS"]
 
-    indoor_temperature_prediction_channel = grpc.insecure_channel(INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS)
+    credentials = grpc.ssl_channel_credentials()
+    indoor_temperature_prediction_channel = grpc.secure_channel(INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS, credentials)
     return indoor_temperature_prediction_pb2_grpc.IndoorTemperaturePredictionStub(indoor_temperature_prediction_channel)
 
 
@@ -583,7 +590,8 @@ def get_hvac_consumption_stub(HVAC_CONSUMPTION_HOST_ADDRESS=None):
     if HVAC_CONSUMPTION_HOST_ADDRESS is None:
         HVAC_CONSUMPTION_HOST_ADDRESS = os.environ["HVAC_CONSUMPTION_HOST_ADDRESS"]
 
-    hvac_consumption_channel = grpc.insecure_channel(HVAC_CONSUMPTION_HOST_ADDRESS)
+    credentials = grpc.ssl_channel_credentials()
+    hvac_consumption_channel = grpc.secure_channel(HVAC_CONSUMPTION_HOST_ADDRESS, credentials)
     return hvac_consumption_pb2_grpc.ConsumptionHVACStub(hvac_consumption_channel)
 
 
@@ -601,7 +609,7 @@ def get_hvac_consumption(hvac_consumption_stub, building, zone):
     return hvac_consumption_final
 
 
-# Outdoor temperature functions
+# Historic outdoor temperature functions
 def get_outdoor_historic_stub(OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS=None):
     """Get the stub to interact with the outdoor_temperature_historical service.
 
@@ -614,7 +622,8 @@ def get_outdoor_historic_stub(OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS=None):
     if OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS is None:
         OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS = os.environ["OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS"]
 
-    outdoor_historic_channel = grpc.insecure_channel(OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS)
+    credentials = grpc.ssl_channel_credentials()
+    outdoor_historic_channel = grpc.secure_channel(OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS, credentials)
     return outdoor_temperature_historical_pb2_grpc.OutdoorTemperatureStub(outdoor_historic_channel)
 
 
@@ -651,6 +660,57 @@ def get_outdoor_temperature_historic(outdoor_historic_stub, building, start, end
 
     return historic_outdoor_final
 
+# Outdoor temperature prediction functions
+def get_outdoor_prediction_stub(OUTDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS=None):
+    """Get the stub to interact with the outdoor_temperature_prediction service.
+
+    :param OUTDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS: Optional argument to supply host address for given service.
+        Otherwise, set as environment variable.
+    :return: grpc Stub object.
+
+    """
+
+    if OUTDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS is None:
+        OUTDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS = os.environ["OUTDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS"]
+
+    credentials = grpc.ssl_channel_credentials()
+    outdoor_prediction_channel = grpc.secure_channel(OUTDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS, credentials)
+    return outdoor_temperature_prediction_pb2_grpc.OutdoorTemperatureStub(outdoor_prediction_channel)
+
+
+def get_outdoor_temperature_prediction(outdoor_prediction_stub, building, start, end, window):
+    """Gets prediction outdoor temperature as pd.series.
+
+    :param outdoor_prediction_stub: grpc stub for outdoor temperature prediction microservice
+    :param building: (str) building name
+    :param zone: (str) zone name
+    :param start: (datetime timezone aware)
+    :param end: (datetime timezone aware)
+    :param window: (str) the interval in which to split the data.
+    :return: pd.series valus=float, index=time
+
+    """
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
+
+    start_unix = int(start.timestamp() * 1e9)
+    end_unix = int(end.timestamp() * 1e9)
+    window_seconds = get_window_in_sec(window)
+
+    # call service
+    prediction_outdoor_response = outdoor_prediction_stub.GetTemperature(
+        outdoor_temperature_prediction_pb2.TemperatureRequest(
+            building=building, start=int(start_unix), end=int(end_unix), window=window))
+
+    # process data
+    prediction_outdoor_final = pd.Series(index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    for msg in prediction_outdoor_response.temperatures:
+        msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
+            tz=start.tzinfo)
+        prediction_outdoor_final.loc[msg_datetime] = msg.temperature
+
+    return prediction_outdoor_final
+
 
 def get_meter_data_historical_stub(METER_DATA_HISTORICAL_HOST_ADDRESS=None):
     """ Get stub to interact with meter data service.
@@ -662,7 +722,8 @@ def get_meter_data_historical_stub(METER_DATA_HISTORICAL_HOST_ADDRESS=None):
     if METER_DATA_HISTORICAL_HOST_ADDRESS is None:
         METER_DATA_HISTORICAL_HOST_ADDRESS = os.environ["METER_DATA_HISTORICAL_HOST_ADDRESS"]
 
-    channel = grpc.insecure_channel(METER_DATA_HISTORICAL_HOST_ADDRESS)
+    credentials = grpc.ssl_channel_credentials()
+    channel = grpc.secure_channel(METER_DATA_HISTORICAL_HOST_ADDRESS,credentials)
     stub = meter_data_historical_pb2_grpc.MeterDataHistoricalStub(channel)
     return stub
 
@@ -741,7 +802,8 @@ def get_optimizer_stub(OPTIMIZER_HOST_ADDRESS=None):
     if OPTIMIZER_HOST_ADDRESS is None:
         OPTIMIZER_HOST_ADDRESS = os.environ["OPTIMIZER_HOST_ADDRESS"]
 
-    channel = grpc.insecure_channel(OPTIMIZER_HOST_ADDRESS)
+    credentials = grpc.ssl_channel_credentials()
+    channel = grpc.secure_channel(OPTIMIZER_HOST_ADDRESS,credentials)
     stub = optimizer_pb2_grpc.OptimizerStub(channel)
     return stub
 

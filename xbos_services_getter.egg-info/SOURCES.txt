@@ -34,5 +34,7 @@ xbos_services_getter/lib/price_pb2.py
 xbos_services_getter/lib/price_pb2_grpc.py
 xbos_services_getter/lib/schedules_pb2.py
 xbos_services_getter/lib/schedules_pb2_grpc.py
+xbos_services_getter/lib/thermal_model_pb2.py
+xbos_services_getter/lib/thermal_model_pb2_grpc.py
 xbos_services_getter/test/__init__.py
 xbos_services_getter/test/test.py
