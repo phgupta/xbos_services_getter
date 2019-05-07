@@ -27,7 +27,6 @@ class ConsumptionHVACServicer(object):
 
   def GetConsumption(self, request, context):
     """A simple RPC.
-
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')

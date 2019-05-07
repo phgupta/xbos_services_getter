@@ -1,29 +1,28 @@
 import grpc
-
+from xbos_services_getter.lib import building_zone_names_pb2
+from xbos_services_getter.lib import building_zone_names_pb2_grpc
 from xbos_services_getter.lib import discomfort_pb2
 from xbos_services_getter.lib import discomfort_pb2_grpc
 from xbos_services_getter.lib import hvac_consumption_pb2
 from xbos_services_getter.lib import hvac_consumption_pb2_grpc
-from xbos_services_getter.lib import indoor_temperature_action_pb2
-from xbos_services_getter.lib import indoor_temperature_action_pb2_grpc
+from xbos_services_getter.lib import indoor_data_historical_pb2
+from xbos_services_getter.lib import indoor_data_historical_pb2_grpc
+from xbos_services_getter.lib import indoor_temperature_prediction_pb2
+from xbos_services_getter.lib import indoor_temperature_prediction_pb2_grpc
+from xbos_services_getter.lib import meter_data_historical_pb2
+from xbos_services_getter.lib import meter_data_historical_pb2_grpc
 from xbos_services_getter.lib import occupancy_pb2
 from xbos_services_getter.lib import occupancy_pb2_grpc
+from xbos_services_getter.lib import optimizer_pb2
+from xbos_services_getter.lib import optimizer_pb2_grpc
 from xbos_services_getter.lib import outdoor_temperature_historical_pb2
 from xbos_services_getter.lib import outdoor_temperature_historical_pb2_grpc
 from xbos_services_getter.lib import outdoor_temperature_prediction_pb2
 from xbos_services_getter.lib import outdoor_temperature_prediction_pb2_grpc
 from xbos_services_getter.lib import price_pb2
 from xbos_services_getter.lib import price_pb2_grpc
-from xbos_services_getter.lib import schedules_pb2
-from xbos_services_getter.lib import schedules_pb2_grpc
-from xbos_services_getter.lib import indoor_temperature_prediction_pb2
-from xbos_services_getter.lib import indoor_temperature_prediction_pb2_grpc
-from xbos_services_getter.lib import building_zone_names_pb2
-from xbos_services_getter.lib import building_zone_names_pb2_grpc
-from xbos_services_getter.lib import meter_data_historical_pb2
-from xbos_services_getter.lib import meter_data_historical_pb2_grpc
-from xbos_services_getter.lib import optimizer_pb2
-from xbos_services_getter.lib import optimizer_pb2_grpc
+from xbos_services_getter.lib import temperature_bands_pb2
+from xbos_services_getter.lib import temperature_bands_pb2_grpc
 
 import datetime
 import pytz
@@ -66,8 +65,8 @@ def get_building_zone_names_stub(BUILDING_ZONE_NAMES_HOST_ADDRESS=None):
 
     credentials = grpc.ssl_channel_credentials()
     channel = grpc.secure_channel(BUILDING_ZONE_NAMES_HOST_ADDRESS, credentials)
-    stub = building_zone_names_pb2_grpc.BuildingZoneNamesStub(channel)
-    return stub
+    return building_zone_names_pb2_grpc.BuildingZoneNamesStub(channel)
+
 
 
 def get_buildings(building_zone_names_stub):
@@ -125,8 +124,7 @@ def get_temperature_band_stub(TEMPERATURE_BANDS_HOST_ADDRESS=None):
 
     credentials = grpc.ssl_channel_credentials()
     temperature_band_channel = grpc.secure_channel(TEMPERATURE_BANDS_HOST_ADDRESS, credentials)
-    temperature_band_stub = schedules_pb2_grpc.SchedulesStub(temperature_band_channel)
-    return temperature_band_stub
+    return temperature_bands_pb2_grpc.SchedulesStub(temperature_band_channel)
 
 
 def get_comfortband(temperature_band_stub, building, zone, start, end, window):
@@ -150,19 +148,31 @@ def get_comfortband(temperature_band_stub, building, zone, start, end, window):
 
     # call service
     comfortband_response = temperature_band_stub.GetComfortband(
-        schedules_pb2.Request(building=building, zone=zone, start=int(start_unix), end=int(end_unix), window=window,
+        temperature_bands_pb2.ScheduleRequest(building=building, zone=zone, start=int(start_unix), end=int(end_unix), window=window,
                               unit="F"))
 
     # process data
-    comfortband_final = pd.DataFrame(columns=["t_high", "t_low"],
-                                     index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    list = []
     for msg in comfortband_response.schedules:
-        msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
-            tz=start.tzinfo)
-        comfortband_final.loc[msg_datetime]["t_high"] = msg.temperature_high
-        comfortband_final.loc[msg_datetime]["t_low"] = msg.temperature_low
-
-    return comfortband_final
+        item = {
+            "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
+            "t_high" : msg.temperature_high,
+            "t_low" : msg.temperature_low,
+            "unit" : msg.unit
+        }
+        list.append(item)
+    df = pd.DataFrame(list)
+    df.set_index("datetime",inplace=True)
+    return df
+    # comfortband_final = pd.DataFrame(columns=["t_high", "t_low"],
+    #                                  index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    # for msg in comfortband_response.schedules:
+    #     msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
+    #         tz=start.tzinfo)
+    #     comfortband_final.loc[msg_datetime]["t_high"] = msg.temperature_high
+    #     comfortband_final.loc[msg_datetime]["t_low"] = msg.temperature_low
+    #
+    # return comfortband_final
 
 
 def get_do_not_exceed(temperature_band_stub, building, zone, start, end, window):
@@ -186,19 +196,31 @@ def get_do_not_exceed(temperature_band_stub, building, zone, start, end, window)
 
     # call service
     do_not_exceed_response = temperature_band_stub.GetDoNotExceed(
-        schedules_pb2.Request(building=building, zone=zone, start=int(start_unix), end=int(end_unix), window=window,
+        temperature_bands_pb2.ScheduleRequest(building=building, zone=zone, start=int(start_unix), end=int(end_unix), window=window,
                               unit="F"))
 
     # process data
-    do_not_exceed_final = pd.DataFrame(columns=["t_high", "t_low"],
-                                       index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    list = []
     for msg in do_not_exceed_response.schedules:
-        msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
-            tz=start.tzinfo)
-        do_not_exceed_final.loc[msg_datetime]["t_high"] = msg.temperature_high
-        do_not_exceed_final.loc[msg_datetime]["t_low"] = msg.temperature_low
-
-    return do_not_exceed_final
+        item = {
+            "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
+            "t_high" : msg.temperature_high,
+            "t_low" : msg.temperature_low,
+            "unit" : msg.unit
+        }
+        list.append(item)
+    df = pd.DataFrame(list)
+    df.set_index("datetime",inplace=True)
+    return df
+    # do_not_exceed_final = pd.DataFrame(columns=["t_high", "t_low"],
+    #                                    index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    # for msg in do_not_exceed_response.schedules:
+    #     msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
+    #         tz=start.tzinfo)
+    #     do_not_exceed_final.loc[msg_datetime]["t_high"] = msg.temperature_high
+    #     do_not_exceed_final.loc[msg_datetime]["t_low"] = msg.temperature_low
+    #
+    # return do_not_exceed_final
 
 
 # occupancy functions
@@ -242,13 +264,23 @@ def get_occupancy(occupancy_stub, building, zone, start, end, window):
         occupancy_pb2.Request(building=building, zone=zone, start=int(start_unix), end=int(end_unix), window=window))
 
     # process data
-    occupancy_final = pd.Series(index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    list = []
     for msg in occupancy_response.occupancies:
-        msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
-            tz=start.tzinfo)
-        occupancy_final.loc[msg_datetime] = msg.occupancy
-
-    return occupancy_final
+        item = {
+            "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
+            "occupancy" : msg.occupancy
+        }
+        list.append(item)
+    df = pd.DataFrame(list)
+    df.set_index("datetime",inplace=True)
+    return df
+    # occupancy_final = pd.Series(index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    # for msg in occupancy_response.occupancies:
+    #     msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
+    #         tz=start.tzinfo)
+    #     occupancy_final.loc[msg_datetime] = msg.occupancy
+    #
+    # return occupancy_final
 
 
 # price functions
@@ -320,13 +352,25 @@ def get_price_utility_tariff(price_stub,utility,tariff,price_type, start, end, w
                                                        end=end_unix,
                                                        window=window))
     # process data
-    price_final = pd.DataFrame(columns=["price", "unit"], index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    list = []
     for msg in price_response.prices:
-        msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo)
-        price_final.loc[msg_datetime]["price"] = msg.price
-        price_final.loc[msg_datetime]["unit"] = msg.unit
-
-    return price_final
+        item = {
+            "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
+            "price" : msg.price,
+            "unit" : msg.unit,
+            "window" : msg.window
+        }
+        list.append(item)
+    df = pd.DataFrame(list)
+    df.set_index("datetime",inplace=True)
+    return df
+    # price_final = pd.DataFrame(columns=["price", "unit"], index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    # for msg in price_response.prices:
+    #     msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo)
+    #     price_final.loc[msg_datetime]["price"] = msg.price
+    #     price_final.loc[msg_datetime]["unit"] = msg.unit
+    #
+    # return price_final
 
 
 def get_price(price_stub, building, price_type, start, end, window):
@@ -389,10 +433,10 @@ def get_indoor_historic_stub(INDOOR_DATA_HISTORICAL_HOST_ADDRESS=None):
 
     credentials = grpc.ssl_channel_credentials()
     indoor_historic_channel = grpc.secure_channel(INDOOR_DATA_HISTORICAL_HOST_ADDRESS, credentials)
-    return indoor_temperature_action_pb2_grpc.IndoorTemperatureActionStub(indoor_historic_channel)
+    return indoor_data_historical_pb2_grpc.IndoorDataHistoricalStub(indoor_historic_channel)
 
 
-def get_indoor_temperature_historic(indoor_historic_stub, building, zone, start, end, window):
+def get_indoor_temperature_historic(indoor_historic_stub, building, zone, start, end, window, agg="MEAN"):
     """Gets historic indoor temperature as pd.series.
 
     :param indoor_historic_stub: grpc stub for historic indoor temperature microservice
@@ -412,21 +456,33 @@ def get_indoor_temperature_historic(indoor_historic_stub, building, zone, start,
     window_seconds = get_window_in_sec(window)
 
     # call service
-    historic_indoor_response = indoor_historic_stub.GetRawTemperatures(
-        indoor_temperature_action_pb2.Request(building=building, zone=zone, start=start_unix, end=end_unix,
-                                              window=window))
+    historic_temperature_response = indoor_historic_stub.GetRawTemperatures(
+        indoor_data_historical_pb2.Request(building=building, zone=zone, start=start_unix, end=end_unix,
+                                              window=window,aggregation=agg))
 
     # process data
-    historic_indoor_final = pd.Series(index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
-    for msg in historic_indoor_response.temperatures:
-        msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
-            tz=start.tzinfo)
-        historic_indoor_final.loc[msg_datetime] = msg.temperature
+    list = []
+    for msg in historic_temperature_response.temperatures:
+        item = {
+            "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
+            "temperature" : msg.temperature,
+            "unit" : msg.unit
+        }
+        list.append(item)
+    df = pd.DataFrame(list)
+    df.set_index("datetime",inplace=True)
+    return df
 
-    return historic_indoor_final
+    # historic_indoor_final = pd.Series(index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    # for msg in historic_indoor_response.temperatures:
+    #     msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
+    #         tz=start.tzinfo)
+    #     historic_indoor_final.loc[msg_datetime] = msg.temperature
+    #
+    # return historic_indoor_final
 
 
-def get_actions_historic(indoor_historic_stub, building, zone, start, end, window):
+def get_indoor_actions_historic(indoor_historic_stub, building, zone, start, end, window,agg="MAX"):
     """Gets historic indoor temperature as pd.series.
 
     :param indoor_historic_stub: grpc stub for historic indoor temperature microservice
@@ -447,20 +503,31 @@ def get_actions_historic(indoor_historic_stub, building, zone, start, end, windo
 
     # call service
     historic_action_response = indoor_historic_stub.GetRawActions(
-        indoor_temperature_action_pb2.Request(building=building, zone=zone, start=start_unix, end=end_unix,
-                                              window=window))
+        indoor_data_historical_pb2.Request(building=building, zone=zone, start=start_unix, end=end_unix,
+                                              window=window,aggregation=agg))
 
     # process data
-    historic_action_final = pd.Series(index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    list = []
     for msg in historic_action_response.actions:
-        msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
-            tz=start.tzinfo)
-        historic_action_final.loc[msg_datetime] = msg.action
+        item = {
+            "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
+            "action" : msg.action
+        }
+        list.append(item)
+    df = pd.DataFrame(list)
+    df.set_index("datetime",inplace=True)
+    return df
 
-    return historic_action_final
+    # historic_action_final = pd.Series(index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    # for msg in historic_action_response.actions:
+    #     msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
+    #         tz=start.tzinfo)
+    #     historic_action_final.loc[msg_datetime] = msg.action
+    #
+    # return historic_action_final
 
 
-def get_setpoints_historic(indoor_historic_stub, building, zone, start, end, window):
+def get_indoor_setpoints_historic(indoor_historic_stub, building, zone, start, end, window,agg="MIN"):
     """Gets historic setpoints temperature as pd.df.
 
     :param indoor_historic_stub: grpc stub for historic indoor temperature microservice
@@ -481,18 +548,30 @@ def get_setpoints_historic(indoor_historic_stub, building, zone, start, end, win
 
     # call service
     historic_setpoints_response = indoor_historic_stub.GetRawTemperatureBands(
-        indoor_temperature_action_pb2.Request(building=building, zone=zone, start=start_unix, end=end_unix,
-                                              window=window))
+        indoor_data_historical_pb2.Request(building=building, zone=zone, start=start_unix, end=end_unix,
+                                              window=window,aggregation=agg))
 
     # process data
-    historic_setpoints_final = pd.DataFrame(columns=["t_low", "t_high"], index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    list = []
     for msg in historic_setpoints_response.setpoints:
-        msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
-            tz=start.tzinfo)
-        historic_setpoints_final.loc[msg_datetime]["t_high"] = msg.temperature_high
-        historic_setpoints_final.loc[msg_datetime]["t_low"] = msg.temperature_low
-
-    return historic_setpoints_final
+        item = {
+            "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
+            "t_high" : msg.temperature_high,
+            "t_low" : msg.temperature_low,
+            "unit" : msg.unit
+        }
+        list.append(item)
+    df = pd.DataFrame(list)
+    df.set_index("datetime",inplace=True)
+    return df
+    # historic_setpoints_final = pd.DataFrame(columns=["t_low", "t_high"], index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    # for msg in historic_setpoints_response.setpoints:
+    #     msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
+    #         tz=start.tzinfo)
+    #     historic_setpoints_final.loc[msg_datetime]["t_high"] = msg.temperature_high
+    #     historic_setpoints_final.loc[msg_datetime]["t_low"] = msg.temperature_low
+    #
+    # return historic_setpoints_final
 
 
 # indoor prediction functions
@@ -542,7 +621,7 @@ def get_indoor_temperature_prediction(indoor_temperature_prediction_stub, buildi
                                               other_zone_temperatures=other_zone_temperatures,
                                               temperature_unit="F"))
 
-    return indoor_prediction_response.temperature
+    return indoor_prediction_response.temperature,datetime.datetime.utcfromtimestamp(indoor_prediction_response.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=current_time.tzinfo),indoor_prediction_response.unit
 
 def get_indoor_temperature_prediction_error(indoor_temperature_prediction_stub, building, zone, action, start=None, end=None,
                                             temperature_unit="F"):
@@ -575,7 +654,7 @@ def get_indoor_temperature_prediction_error(indoor_temperature_prediction_stub, 
                                               end=end_unix,
                                               unit=temperature_unit))
 
-    return error_response.mean, error_response.var
+    return error_response.mean, error_response.var,error_response.unit
 
 # HVAC Consumption functions
 def get_hvac_consumption_stub(HVAC_CONSUMPTION_HOST_ADDRESS=None):
@@ -604,13 +683,14 @@ def get_hvac_consumption(hvac_consumption_stub, building, zone):
                               COOLING_ACTION: hvac_consumption_response.cooling_consumption,
                               FAN: hvac_consumption_response.ventilation_consumption,
                               TWO_STAGE_HEATING_ACTION: hvac_consumption_response.heating_consumption_stage_two,
-                              TWO_STAGE_COOLING_ACTION: hvac_consumption_response.cooling_consumption_stage_two}
+                              TWO_STAGE_COOLING_ACTION: hvac_consumption_response.cooling_consumption_stage_two,
+                              "UNIT": hvac_consumption_response.unit}
 
     return hvac_consumption_final
 
 
 # Historic outdoor temperature functions
-def get_outdoor_historic_stub(OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS=None):
+def get_outdoor_temperature_historic_stub(OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS=None):
     """Get the stub to interact with the outdoor_temperature_historical service.
 
     :param OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS: Optional argument to supply host address for given service.
@@ -652,16 +732,28 @@ def get_outdoor_temperature_historic(outdoor_historic_stub, building, start, end
             building=building, start=int(start_unix), end=int(end_unix), window=window))
 
     # process data
-    historic_outdoor_final = pd.Series(index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    list = []
     for msg in historic_outdoor_response.temperatures:
-        msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
-            tz=start.tzinfo)
-        historic_outdoor_final.loc[msg_datetime] = msg.temperature
+        item = {
+            "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
+            "temperature" : msg.temperature,
+            "unit" : msg.unit
+        }
+        list.append(item)
+    df = pd.DataFrame(list)
+    df.set_index("datetime",inplace=True)
+    return df
 
-    return historic_outdoor_final
+    # historic_outdoor_final = pd.Series(index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    # for msg in historic_outdoor_response.temperatures:
+    #     msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
+    #         tz=start.tzinfo)
+    #     historic_outdoor_final.loc[msg_datetime] = msg.temperature
+    #
+    # return historic_outdoor_final
 
 # Outdoor temperature prediction functions
-def get_outdoor_prediction_stub(OUTDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS=None):
+def get_outdoor_temperature_prediction_stub(OUTDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS=None):
     """Get the stub to interact with the outdoor_temperature_prediction service.
 
     :param OUTDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS: Optional argument to supply host address for given service.
@@ -703,13 +795,25 @@ def get_outdoor_temperature_prediction(outdoor_prediction_stub, building, start,
             building=building, start=int(start_unix), end=int(end_unix), window=window))
 
     # process data
-    prediction_outdoor_final = pd.Series(index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    list = []
     for msg in prediction_outdoor_response.temperatures:
-        msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
-            tz=start.tzinfo)
-        prediction_outdoor_final.loc[msg_datetime] = msg.temperature
+        item = {
+            "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
+            "temperature" : msg.temperature,
+            "unit" : msg.unit
+        }
+        list.append(item)
+    df = pd.DataFrame(list)
+    df.set_index("datetime",inplace=True)
+    return df
 
-    return prediction_outdoor_final
+    # prediction_outdoor_final = pd.Series(index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    # for msg in prediction_outdoor_response.temperatures:
+    #     msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
+    #         tz=start.tzinfo)
+    #     prediction_outdoor_final.loc[msg_datetime] = msg.temperature
+    #
+    # return prediction_outdoor_final
 
 
 def get_meter_data_historical_stub(METER_DATA_HISTORICAL_HOST_ADDRESS=None):
@@ -724,8 +828,7 @@ def get_meter_data_historical_stub(METER_DATA_HISTORICAL_HOST_ADDRESS=None):
 
     credentials = grpc.ssl_channel_credentials()
     channel = grpc.secure_channel(METER_DATA_HISTORICAL_HOST_ADDRESS,credentials)
-    stub = meter_data_historical_pb2_grpc.MeterDataHistoricalStub(channel)
-    return stub
+    return meter_data_historical_pb2_grpc.MeterDataHistoricalStub(channel)
 
 
 def get_meter_data_historical(meter_data_stub, bldg, start, end, point_type, aggregate, window):
@@ -759,38 +862,23 @@ def get_meter_data_historical(meter_data_stub, bldg, start, end, point_type, agg
 
     historic_meter_data_response = meter_data_stub.GetMeterDataHistorical(request)
 
-    historic_meter_data_final = pd.Series(index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    # process data
+    list = []
     for msg in historic_meter_data_response.point:
-        msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
-            tz=start.tzinfo)
-        historic_meter_data_final.loc[msg_datetime] = msg.power
-    return historic_meter_data_final
-
-def check_data(data, start, end, window, check_nan=False):
-    """Checks if data has right times and optionally checks for nan.
-    This includes checking that the daterange [param:start (inculsive) - param:end (exclusive)) is included in the data.
-    And that the time-difference between datapoints equals to param:window.
-
-    :param data: pd.df or pd.series
-    :param start: datetime (timezone aware)
-    :param end: datetime (timezone aware)
-    :param window: (string)
-    :param check_nan: If False (default) will not return an error if a datapoint is Nan. If True, will error on nan
-    data points.
-    :return: str err message. If no error, returns None."""
-    if not isinstance(data, pd.DataFrame) and not isinstance(data, pd.Series):
-        return "Is not a pd.DataFrame/pd.Series"
-
-    window = get_window_in_sec(window)
-    time_diffs = data.index.to_series(keep_tz=True).diff()
-    if (time_diffs.shape[0] > 1) and ((time_diffs.min() != time_diffs.max()) or (time_diffs.min().seconds != window)):
-        return "Missing rows or/and bad time frequency."
-    if (start not in data.index) or ((end - datetime.timedelta(seconds=window)) not in data.index):
-        return "Does not have valid start or/and end time."
-    if check_nan and (data.isna().values.any()):
-        return "Nan values in data."
-    return None
-
+        item = {
+            "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
+            "power" : msg.power
+        }
+        list.append(item)
+    df = pd.DataFrame(list)
+    df.set_index("datetime",inplace=True)
+    return df
+    # historic_meter_data_final = pd.Series(index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
+    # for msg in historic_meter_data_response.point:
+    #     msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
+    #         tz=start.tzinfo)
+    #     historic_meter_data_final.loc[msg_datetime] = msg.power
+    # return historic_meter_data_final
 
 def get_optimizer_stub(OPTIMIZER_HOST_ADDRESS=None):
     """ Get stub to interact with optimizer service.
@@ -804,8 +892,7 @@ def get_optimizer_stub(OPTIMIZER_HOST_ADDRESS=None):
 
     credentials = grpc.ssl_channel_credentials()
     channel = grpc.secure_channel(OPTIMIZER_HOST_ADDRESS,credentials)
-    stub = optimizer_pb2_grpc.OptimizerStub(channel)
-    return stub
+    return optimizer_pb2_grpc.OptimizerStub(channel)
 
 
 def get_mpc_optimization(optimizer_stub, building, zones, start, end, window, lambda_val, starting_temperatures,
@@ -843,3 +930,28 @@ def get_mpc_optimization(optimizer_stub, building, zones, start, end, window, la
             unit=unit))
 
     return {iter_zone: optimizer_response.actions[iter_zone] for iter_zone in zones}
+
+def check_data(data, start, end, window, check_nan=False):
+    """Checks if data has right times and optionally checks for nan.
+    This includes checking that the daterange [param:start (inculsive) - param:end (exclusive)) is included in the data.
+    And that the time-difference between datapoints equals to param:window.
+
+    :param data: pd.df or pd.series
+    :param start: datetime (timezone aware)
+    :param end: datetime (timezone aware)
+    :param window: (string)
+    :param check_nan: If False (default) will not return an error if a datapoint is Nan. If True, will error on nan
+    data points.
+    :return: str err message. If no error, returns None."""
+    if not isinstance(data, pd.DataFrame) and not isinstance(data, pd.Series):
+        return "Is not a pd.DataFrame/pd.Series"
+
+    window = get_window_in_sec(window)
+    time_diffs = data.index.to_series(keep_tz=True).diff()
+    if (time_diffs.shape[0] > 1) and ((time_diffs.min() != time_diffs.max()) or (time_diffs.min().seconds != window)):
+        return "Missing rows or/and bad time frequency."
+    if (start not in data.index) or ((end - datetime.timedelta(seconds=window)) not in data.index):
+        return "Does not have valid start or/and end time."
+    if check_nan and (data.isna().values.any()):
+        return "Nan values in data."
+    return None
