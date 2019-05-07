@@ -16,8 +16,8 @@ xbos_services_getter/lib/discomfort_pb2.py
 xbos_services_getter/lib/discomfort_pb2_grpc.py
 xbos_services_getter/lib/hvac_consumption_pb2.py
 xbos_services_getter/lib/hvac_consumption_pb2_grpc.py
-xbos_services_getter/lib/indoor_temperature_action_pb2.py
-xbos_services_getter/lib/indoor_temperature_action_pb2_grpc.py
+xbos_services_getter/lib/indoor_data_historical_pb2.py
+xbos_services_getter/lib/indoor_data_historical_pb2_grpc.py
 xbos_services_getter/lib/indoor_temperature_prediction_pb2.py
 xbos_services_getter/lib/indoor_temperature_prediction_pb2_grpc.py
 xbos_services_getter/lib/meter_data_historical_pb2.py
@@ -32,9 +32,7 @@ xbos_services_getter/lib/outdoor_temperature_prediction_pb2.py
 xbos_services_getter/lib/outdoor_temperature_prediction_pb2_grpc.py
 xbos_services_getter/lib/price_pb2.py
 xbos_services_getter/lib/price_pb2_grpc.py
-xbos_services_getter/lib/schedules_pb2.py
-xbos_services_getter/lib/schedules_pb2_grpc.py
-xbos_services_getter/lib/thermal_model_pb2.py
-xbos_services_getter/lib/thermal_model_pb2_grpc.py
+xbos_services_getter/lib/temperature_bands_pb2.py
+xbos_services_getter/lib/temperature_bands_pb2_grpc.py
 xbos_services_getter/test/__init__.py
 xbos_services_getter/test/test.py
