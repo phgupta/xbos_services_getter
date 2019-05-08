@@ -595,7 +595,7 @@ def get_indoor_temperature_prediction_error(indoor_temperature_prediction_stub, 
     :param start: (datetime timezone aware). If None, get the training error.
     :param end: (datetime timezone aware). If None, get the training error.
     :param temperature_unit: temperature unit
-    :return:
+    :return: mean error (float), varirance of error (float), unit of the error (string). 
     """
     if (start is None) or (end is None):
         end = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
@@ -614,7 +614,7 @@ def get_indoor_temperature_prediction_error(indoor_temperature_prediction_stub, 
                                               end=end_unix,
                                               unit=temperature_unit))
 
-    return error_response.mean, error_response.var,error_response.unit
+    return error_response.mean, error_response.var, error_response.unit
 
 # HVAC Consumption functions
 def get_hvac_consumption_stub(HVAC_CONSUMPTION_HOST_ADDRESS=None,secure=True):
