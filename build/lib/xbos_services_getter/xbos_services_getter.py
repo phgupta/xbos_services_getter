@@ -51,7 +51,7 @@ def get_window_in_sec(s):
 
 
 # Building and Zone names
-def get_building_zone_names_stub(BUILDING_ZONE_NAMES_HOST_ADDRESS=None):
+def get_building_zone_names_stub(BUILDING_ZONE_NAMES_HOST_ADDRESS=None,secure=True):
     """Get the stub to interact with the building_zone_address service.
 
     :param BUILDING_ZONE_NAMES_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
@@ -63,8 +63,11 @@ def get_building_zone_names_stub(BUILDING_ZONE_NAMES_HOST_ADDRESS=None):
     if BUILDING_ZONE_NAMES_HOST_ADDRESS is None:
         BUILDING_ZONE_NAMES_HOST_ADDRESS = os.environ["BUILDING_ZONE_NAMES_HOST_ADDRESS"]
 
-    credentials = grpc.ssl_channel_credentials()
-    channel = grpc.secure_channel(BUILDING_ZONE_NAMES_HOST_ADDRESS, credentials)
+    if not secure:
+        channel = grpc.insecure_channel(BUILDING_ZONE_NAMES_HOST_ADDRESS)
+    else:
+        credentials = grpc.ssl_channel_credentials()
+        channel = grpc.secure_channel(BUILDING_ZONE_NAMES_HOST_ADDRESS, credentials)
     return building_zone_names_pb2_grpc.BuildingZoneNamesStub(channel)
 
 
@@ -110,7 +113,7 @@ def get_all_buildings_zones(building_zone_names_stub):
 
 
 # Temperature band functions
-def get_temperature_band_stub(TEMPERATURE_BANDS_HOST_ADDRESS=None):
+def get_temperature_band_stub(TEMPERATURE_BANDS_HOST_ADDRESS=None,secure=True):
     """Get the stub to interact with the temperature_band service.
 
     :param TEMPERATURE_BANDS_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
@@ -121,10 +124,12 @@ def get_temperature_band_stub(TEMPERATURE_BANDS_HOST_ADDRESS=None):
 
     if TEMPERATURE_BANDS_HOST_ADDRESS is None:
         TEMPERATURE_BANDS_HOST_ADDRESS = os.environ["TEMPERATURE_BANDS_HOST_ADDRESS"]
-
-    credentials = grpc.ssl_channel_credentials()
-    temperature_band_channel = grpc.secure_channel(TEMPERATURE_BANDS_HOST_ADDRESS, credentials)
-    return temperature_bands_pb2_grpc.SchedulesStub(temperature_band_channel)
+    if not secure:
+        channel = grpc.insecure_channel(TEMPERATURE_BANDS_HOST_ADDRESS)
+    else:
+        credentials = grpc.ssl_channel_credentials()
+        channel = grpc.secure_channel(TEMPERATURE_BANDS_HOST_ADDRESS, credentials)
+    return temperature_bands_pb2_grpc.SchedulesStub(channel)
 
 
 def get_comfortband(temperature_band_stub, building, zone, start, end, window):
@@ -164,15 +169,6 @@ def get_comfortband(temperature_band_stub, building, zone, start, end, window):
     df = pd.DataFrame(list)
     df.set_index("datetime",inplace=True)
     return df
-    # comfortband_final = pd.DataFrame(columns=["t_high", "t_low"],
-    #                                  index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
-    # for msg in comfortband_response.schedules:
-    #     msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
-    #         tz=start.tzinfo)
-    #     comfortband_final.loc[msg_datetime]["t_high"] = msg.temperature_high
-    #     comfortband_final.loc[msg_datetime]["t_low"] = msg.temperature_low
-    #
-    # return comfortband_final
 
 
 def get_do_not_exceed(temperature_band_stub, building, zone, start, end, window):
@@ -212,19 +208,10 @@ def get_do_not_exceed(temperature_band_stub, building, zone, start, end, window)
     df = pd.DataFrame(list)
     df.set_index("datetime",inplace=True)
     return df
-    # do_not_exceed_final = pd.DataFrame(columns=["t_high", "t_low"],
-    #                                    index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
-    # for msg in do_not_exceed_response.schedules:
-    #     msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
-    #         tz=start.tzinfo)
-    #     do_not_exceed_final.loc[msg_datetime]["t_high"] = msg.temperature_high
-    #     do_not_exceed_final.loc[msg_datetime]["t_low"] = msg.temperature_low
-    #
-    # return do_not_exceed_final
 
 
 # occupancy functions
-def get_occupancy_stub(OCCUPANCY_HOST_ADDRESS=None):
+def get_occupancy_stub(OCCUPANCY_HOST_ADDRESS=None,secure=True):
     """Get the stub to interact with the occupancy service.
 
     :param OCCUPANCY_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
@@ -235,9 +222,12 @@ def get_occupancy_stub(OCCUPANCY_HOST_ADDRESS=None):
     if OCCUPANCY_HOST_ADDRESS is None:
         OCCUPANCY_HOST_ADDRESS = os.environ["OCCUPANCY_HOST_ADDRESS"]
 
-    credentials = grpc.ssl_channel_credentials()
-    occupancy_channel = grpc.secure_channel(OCCUPANCY_HOST_ADDRESS, credentials)
-    return occupancy_pb2_grpc.OccupancyStub(occupancy_channel)
+    if not secure:
+        channel = grpc.insecure_channel(OCCUPANCY_HOST_ADDRESS)
+    else:
+        credentials = grpc.ssl_channel_credentials()
+        channel = grpc.secure_channel(OCCUPANCY_HOST_ADDRESS, credentials)
+    return occupancy_pb2_grpc.OccupancyStub(channel)
 
 
 def get_occupancy(occupancy_stub, building, zone, start, end, window):
@@ -274,17 +264,10 @@ def get_occupancy(occupancy_stub, building, zone, start, end, window):
     df = pd.DataFrame(list)
     df.set_index("datetime",inplace=True)
     return df
-    # occupancy_final = pd.Series(index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
-    # for msg in occupancy_response.occupancies:
-    #     msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
-    #         tz=start.tzinfo)
-    #     occupancy_final.loc[msg_datetime] = msg.occupancy
-    #
-    # return occupancy_final
 
 
 # price functions
-def get_price_stub(PRICE_HOST_ADDRESS=None):
+def get_price_stub(PRICE_HOST_ADDRESS=None,secure=True):
     """Get the stub to interact with the price service.
 
     :param PRICEPRICE_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
@@ -295,9 +278,12 @@ def get_price_stub(PRICE_HOST_ADDRESS=None):
     if PRICE_HOST_ADDRESS is None:
         PRICE_HOST_ADDRESS = os.environ["PRICE_HOST_ADDRESS"]
 
-    credentials = grpc.ssl_channel_credentials()
-    price_channel = grpc.secure_channel(PRICE_HOST_ADDRESS, credentials)
-    return price_pb2_grpc.PriceStub(price_channel)
+    if not secure:
+        channel = grpc.insecure_channel(PRICE_HOST_ADDRESS)
+    else:
+        credentials = grpc.ssl_channel_credentials()
+        channel = grpc.secure_channel(PRICE_HOST_ADDRESS, credentials)
+    return price_pb2_grpc.PriceStub(channel)
 
 def get_all_tariffs(price_stub):
     """Gets all available tariffs and utilities as a list of dictionaries.
@@ -364,14 +350,6 @@ def get_price_utility_tariff(price_stub,utility,tariff,price_type, start, end, w
     df = pd.DataFrame(list)
     df.set_index("datetime",inplace=True)
     return df
-    # price_final = pd.DataFrame(columns=["price", "unit"], index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
-    # for msg in price_response.prices:
-    #     msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo)
-    #     price_final.loc[msg_datetime]["price"] = msg.price
-    #     price_final.loc[msg_datetime]["unit"] = msg.unit
-    #
-    # return price_final
-
 
 def get_price(price_stub, building, price_type, start, end, window):
     """Gets the price as a pandas dataframe.
@@ -391,7 +369,7 @@ def get_price(price_stub, building, price_type, start, end, window):
 
 
 # discomfort functions
-def get_discomfort_stub(DISCOMFORT_HOST_ADDRESS=None):
+def get_discomfort_stub(DISCOMFORT_HOST_ADDRESS=None,secure=True):
     """Get the stub to interact with the discomfort service.
 
     :param DISCOMFORT_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
@@ -403,9 +381,12 @@ def get_discomfort_stub(DISCOMFORT_HOST_ADDRESS=None):
     if DISCOMFORT_HOST_ADDRESS is None:
         DISCOMFORT_HOST_ADDRESS = os.environ["DISCOMFORT_HOST_ADDRESS"]
 
-    credentials = grpc.ssl_channel_credentials()
-    discomfort_channel = grpc.secure_channel(DISCOMFORT_HOST_ADDRESS, credentials)
-    return discomfort_pb2_grpc.DiscomfortStub(discomfort_channel)
+    if not secure:
+        channel = grpc.insecure_channel(DISCOMFORT_HOST_ADDRESS)
+    else:
+        credentials = grpc.ssl_channel_credentials()
+        channel = grpc.secure_channel(DISCOMFORT_HOST_ADDRESS, credentials)
+    return discomfort_pb2_grpc.DiscomfortStub(channel)
 
 
 def get_discomfort(discomfort_stub, building, temperature, temperature_low, temperature_high, occupancy):
@@ -419,7 +400,7 @@ def get_discomfort(discomfort_stub, building, temperature, temperature_low, temp
 
 
 # indoor historic functions
-def get_indoor_historic_stub(INDOOR_DATA_HISTORICAL_HOST_ADDRESS=None):
+def get_indoor_historic_stub(INDOOR_DATA_HISTORICAL_HOST_ADDRESS=None,secure=True):
     """Get the stub to interact with the indoor_data_historical service.
 
     :param INDOOR_DATA_HISTORICAL_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
@@ -431,9 +412,12 @@ def get_indoor_historic_stub(INDOOR_DATA_HISTORICAL_HOST_ADDRESS=None):
     if INDOOR_DATA_HISTORICAL_HOST_ADDRESS is None:
         INDOOR_DATA_HISTORICAL_HOST_ADDRESS = os.environ["INDOOR_DATA_HISTORICAL_HOST_ADDRESS"]
 
-    credentials = grpc.ssl_channel_credentials()
-    indoor_historic_channel = grpc.secure_channel(INDOOR_DATA_HISTORICAL_HOST_ADDRESS, credentials)
-    return indoor_data_historical_pb2_grpc.IndoorDataHistoricalStub(indoor_historic_channel)
+    if not secure:
+        channel = grpc.insecure_channel(INDOOR_DATA_HISTORICAL_HOST_ADDRESS)
+    else:
+        credentials = grpc.ssl_channel_credentials()
+        channel = grpc.secure_channel(INDOOR_DATA_HISTORICAL_HOST_ADDRESS, credentials)
+    return indoor_data_historical_pb2_grpc.IndoorDataHistoricalStub(channel)
 
 
 def get_indoor_temperature_historic(indoor_historic_stub, building, zone, start, end, window, agg="MEAN"):
@@ -473,15 +457,6 @@ def get_indoor_temperature_historic(indoor_historic_stub, building, zone, start,
     df.set_index("datetime",inplace=True)
     return df
 
-    # historic_indoor_final = pd.Series(index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
-    # for msg in historic_indoor_response.temperatures:
-    #     msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
-    #         tz=start.tzinfo)
-    #     historic_indoor_final.loc[msg_datetime] = msg.temperature
-    #
-    # return historic_indoor_final
-
-
 def get_indoor_actions_historic(indoor_historic_stub, building, zone, start, end, window,agg="MAX"):
     """Gets historic indoor temperature as pd.series.
 
@@ -517,15 +492,6 @@ def get_indoor_actions_historic(indoor_historic_stub, building, zone, start, end
     df = pd.DataFrame(list)
     df.set_index("datetime",inplace=True)
     return df
-
-    # historic_action_final = pd.Series(index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
-    # for msg in historic_action_response.actions:
-    #     msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
-    #         tz=start.tzinfo)
-    #     historic_action_final.loc[msg_datetime] = msg.action
-    #
-    # return historic_action_final
-
 
 def get_indoor_setpoints_historic(indoor_historic_stub, building, zone, start, end, window,agg="MIN"):
     """Gets historic setpoints temperature as pd.df.
@@ -564,18 +530,9 @@ def get_indoor_setpoints_historic(indoor_historic_stub, building, zone, start, e
     df = pd.DataFrame(list)
     df.set_index("datetime",inplace=True)
     return df
-    # historic_setpoints_final = pd.DataFrame(columns=["t_low", "t_high"], index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
-    # for msg in historic_setpoints_response.setpoints:
-    #     msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
-    #         tz=start.tzinfo)
-    #     historic_setpoints_final.loc[msg_datetime]["t_high"] = msg.temperature_high
-    #     historic_setpoints_final.loc[msg_datetime]["t_low"] = msg.temperature_low
-    #
-    # return historic_setpoints_final
-
 
 # indoor prediction functions
-def get_indoor_temperature_prediction_stub(INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS=None):
+def get_indoor_temperature_prediction_stub(INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS=None,secure=True):
     """Get the stub to interact with the indoor_temperature_prediction service.
 
     :param INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
@@ -587,9 +544,12 @@ def get_indoor_temperature_prediction_stub(INDOOR_TEMPERATURE_PREDICTION_HOST_AD
     if INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS is None:
         INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS = os.environ["INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS"]
 
-    credentials = grpc.ssl_channel_credentials()
-    indoor_temperature_prediction_channel = grpc.secure_channel(INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS, credentials)
-    return indoor_temperature_prediction_pb2_grpc.IndoorTemperaturePredictionStub(indoor_temperature_prediction_channel)
+    if not secure:
+        channel = grpc.insecure_channel(INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS)
+    else:
+        credentials = grpc.ssl_channel_credentials()
+        channel = grpc.secure_channel(INDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS, credentials)
+    return indoor_temperature_prediction_pb2_grpc.IndoorTemperaturePredictionStub(channel)
 
 
 def get_indoor_temperature_prediction(indoor_temperature_prediction_stub, building, zone, current_time, action, t_in, t_out, t_prev,
@@ -635,7 +595,7 @@ def get_indoor_temperature_prediction_error(indoor_temperature_prediction_stub, 
     :param start: (datetime timezone aware). If None, get the training error.
     :param end: (datetime timezone aware). If None, get the training error.
     :param temperature_unit: temperature unit
-    :return:
+    :return: mean error (float), varirance of error (float), unit of the error (string). 
     """
     if (start is None) or (end is None):
         end = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
@@ -654,10 +614,10 @@ def get_indoor_temperature_prediction_error(indoor_temperature_prediction_stub, 
                                               end=end_unix,
                                               unit=temperature_unit))
 
-    return error_response.mean, error_response.var,error_response.unit
+    return error_response.mean, error_response.var, error_response.unit
 
 # HVAC Consumption functions
-def get_hvac_consumption_stub(HVAC_CONSUMPTION_HOST_ADDRESS=None):
+def get_hvac_consumption_stub(HVAC_CONSUMPTION_HOST_ADDRESS=None,secure=True):
     """Get the stub to interact with the hvac_consumption service.
 
     :param HVAC_CONSUMPTION_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
@@ -669,9 +629,12 @@ def get_hvac_consumption_stub(HVAC_CONSUMPTION_HOST_ADDRESS=None):
     if HVAC_CONSUMPTION_HOST_ADDRESS is None:
         HVAC_CONSUMPTION_HOST_ADDRESS = os.environ["HVAC_CONSUMPTION_HOST_ADDRESS"]
 
-    credentials = grpc.ssl_channel_credentials()
-    hvac_consumption_channel = grpc.secure_channel(HVAC_CONSUMPTION_HOST_ADDRESS, credentials)
-    return hvac_consumption_pb2_grpc.ConsumptionHVACStub(hvac_consumption_channel)
+    if not secure:
+        channel = grpc.insecure_channel(HVAC_CONSUMPTION_HOST_ADDRESS)
+    else:
+        credentials = grpc.ssl_channel_credentials()
+        channel = grpc.secure_channel(HVAC_CONSUMPTION_HOST_ADDRESS, credentials)
+    return hvac_consumption_pb2_grpc.ConsumptionHVACStub(channel)
 
 
 def get_hvac_consumption(hvac_consumption_stub, building, zone):
@@ -690,7 +653,7 @@ def get_hvac_consumption(hvac_consumption_stub, building, zone):
 
 
 # Historic outdoor temperature functions
-def get_outdoor_temperature_historic_stub(OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS=None):
+def get_outdoor_temperature_historic_stub(OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS=None,secure=True):
     """Get the stub to interact with the outdoor_temperature_historical service.
 
     :param OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS: Optional argument to supply host address for given service.
@@ -702,9 +665,12 @@ def get_outdoor_temperature_historic_stub(OUTDOOR_TEMPERATURE_HISTORICAL_HOST_AD
     if OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS is None:
         OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS = os.environ["OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS"]
 
-    credentials = grpc.ssl_channel_credentials()
-    outdoor_historic_channel = grpc.secure_channel(OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS, credentials)
-    return outdoor_temperature_historical_pb2_grpc.OutdoorTemperatureStub(outdoor_historic_channel)
+    if not secure:
+        channel = grpc.insecure_channel(OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS)
+    else:
+        credentials = grpc.ssl_channel_credentials()
+        channel = grpc.secure_channel(OUTDOOR_TEMPERATURE_HISTORICAL_HOST_ADDRESS, credentials)
+    return outdoor_temperature_historical_pb2_grpc.OutdoorTemperatureStub(channel)
 
 
 def get_outdoor_temperature_historic(outdoor_historic_stub, building, start, end, window):
@@ -744,16 +710,8 @@ def get_outdoor_temperature_historic(outdoor_historic_stub, building, start, end
     df.set_index("datetime",inplace=True)
     return df
 
-    # historic_outdoor_final = pd.Series(index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
-    # for msg in historic_outdoor_response.temperatures:
-    #     msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
-    #         tz=start.tzinfo)
-    #     historic_outdoor_final.loc[msg_datetime] = msg.temperature
-    #
-    # return historic_outdoor_final
-
 # Outdoor temperature prediction functions
-def get_outdoor_temperature_prediction_stub(OUTDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS=None):
+def get_outdoor_temperature_prediction_stub(OUTDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS=None,secure=True):
     """Get the stub to interact with the outdoor_temperature_prediction service.
 
     :param OUTDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS: Optional argument to supply host address for given service.
@@ -765,9 +723,12 @@ def get_outdoor_temperature_prediction_stub(OUTDOOR_TEMPERATURE_PREDICTION_HOST_
     if OUTDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS is None:
         OUTDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS = os.environ["OUTDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS"]
 
-    credentials = grpc.ssl_channel_credentials()
-    outdoor_prediction_channel = grpc.secure_channel(OUTDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS, credentials)
-    return outdoor_temperature_prediction_pb2_grpc.OutdoorTemperatureStub(outdoor_prediction_channel)
+    if not secure:
+        channel = grpc.insecure_channel(OUTDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS)
+    else:
+        credentials = grpc.ssl_channel_credentials()
+        channel = grpc.secure_channel(OUTDOOR_TEMPERATURE_PREDICTION_HOST_ADDRESS, credentials)
+    return outdoor_temperature_prediction_pb2_grpc.OutdoorTemperatureStub(channel)
 
 
 def get_outdoor_temperature_prediction(outdoor_prediction_stub, building, start, end, window):
@@ -807,16 +768,7 @@ def get_outdoor_temperature_prediction(outdoor_prediction_stub, building, start,
     df.set_index("datetime",inplace=True)
     return df
 
-    # prediction_outdoor_final = pd.Series(index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
-    # for msg in prediction_outdoor_response.temperatures:
-    #     msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
-    #         tz=start.tzinfo)
-    #     prediction_outdoor_final.loc[msg_datetime] = msg.temperature
-    #
-    # return prediction_outdoor_final
-
-
-def get_meter_data_historical_stub(METER_DATA_HISTORICAL_HOST_ADDRESS=None):
+def get_meter_data_historical_stub(METER_DATA_HISTORICAL_HOST_ADDRESS=None,secure=True):
     """ Get stub to interact with meter data service.
     :param METER_DATA_HISTORICAL_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
         set as environment variable.
@@ -826,8 +778,11 @@ def get_meter_data_historical_stub(METER_DATA_HISTORICAL_HOST_ADDRESS=None):
     if METER_DATA_HISTORICAL_HOST_ADDRESS is None:
         METER_DATA_HISTORICAL_HOST_ADDRESS = os.environ["METER_DATA_HISTORICAL_HOST_ADDRESS"]
 
-    credentials = grpc.ssl_channel_credentials()
-    channel = grpc.secure_channel(METER_DATA_HISTORICAL_HOST_ADDRESS,credentials)
+    if not secure:
+        channel = grpc.insecure_channel(METER_DATA_HISTORICAL_HOST_ADDRESS)
+    else:
+        credentials = grpc.ssl_channel_credentials()
+        channel = grpc.secure_channel(METER_DATA_HISTORICAL_HOST_ADDRESS,credentials)
     return meter_data_historical_pb2_grpc.MeterDataHistoricalStub(channel)
 
 
@@ -873,14 +828,9 @@ def get_meter_data_historical(meter_data_stub, bldg, start, end, point_type, agg
     df = pd.DataFrame(list)
     df.set_index("datetime",inplace=True)
     return df
-    # historic_meter_data_final = pd.Series(index=pd.date_range(start, end, freq=str(window_seconds) + "S"))[:-1]
-    # for msg in historic_meter_data_response.point:
-    #     msg_datetime = datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(
-    #         tz=start.tzinfo)
-    #     historic_meter_data_final.loc[msg_datetime] = msg.power
-    # return historic_meter_data_final
 
-def get_optimizer_stub(OPTIMIZER_HOST_ADDRESS=None):
+
+def get_optimizer_stub(OPTIMIZER_HOST_ADDRESS=None,secure=True):
     """ Get stub to interact with optimizer service.
     :param OPTIMIZER_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
         set as environment variable.
@@ -890,8 +840,11 @@ def get_optimizer_stub(OPTIMIZER_HOST_ADDRESS=None):
     if OPTIMIZER_HOST_ADDRESS is None:
         OPTIMIZER_HOST_ADDRESS = os.environ["OPTIMIZER_HOST_ADDRESS"]
 
-    credentials = grpc.ssl_channel_credentials()
-    channel = grpc.secure_channel(OPTIMIZER_HOST_ADDRESS,credentials)
+    if not secure:
+        channel = grpc.insecure_channel(OPTIMIZER_HOST_ADDRESS)
+    else:
+        credentials = grpc.ssl_channel_credentials()
+        channel = grpc.secure_channel(OPTIMIZER_HOST_ADDRESS,credentials)
     return optimizer_pb2_grpc.OptimizerStub(channel)
 
 

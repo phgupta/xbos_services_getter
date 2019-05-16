@@ -595,7 +595,7 @@ def get_indoor_temperature_prediction_error(indoor_temperature_prediction_stub, 
     :param start: (datetime timezone aware). If None, get the training error.
     :param end: (datetime timezone aware). If None, get the training error.
     :param temperature_unit: temperature unit
-    :return: mean error (float), varirance of error (float), unit of the error (string). 
+    :return: mean error (float), varirance of error (float), unit of the error (string).
     """
     if (start is None) or (end is None):
         end = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
@@ -883,6 +883,63 @@ def get_mpc_optimization(optimizer_stub, building, zones, start, end, window, la
             unit=unit))
 
     return {iter_zone: optimizer_response.actions[iter_zone] for iter_zone in zones}
+
+def get_mpc_simulation(optimizer_stub, building, zones, start, end, window,
+                        forecasting_horizon, lambda_val, starting_temperatures,
+                         unit="F", num_runs=1):
+    """Get the simulation results according to MPC optimization. Stops get_mpc_simulation
+    when param:end is reached.
+
+    :param optimizer_stub: grpc stub for optimizer service
+    :param building: (str) building name
+    :param zones: (list str) zones names
+    :param start: datetime (timezone aware)
+    :param end: datetime (timezone aware)
+    :param window: (str) the intervals in which to optimize
+    :param forecasting_horizon: (str) the timeframe for which to simulate at every step.
+    :param lambda_val: (float) between 0 and 1. The lambda value to balance cost and discomfort.
+    :param starting_temperatures: (dict) {str zone: float temperature} the starting temperatures of all zones in
+        given building.
+    :param unit: (string) the unit of the temperature.
+    :param num_runs: (int) the number of runs of simulation to get a better idea
+        of the variance of the simulation.
+    :returns:
+        actions: {iter_zone: [actions]} actions that were excecuted for
+            every step.
+        temperatures: ({iter_zone: [temperatures]) temperature seen
+            at every step.
+        len(actions[zone]) = (end - start)/window
+        len(temperatures[zone]) = (end - start)/temperatures + 1
+    """
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
+
+    start_unix = int(start.timestamp() * 1e9)
+    end_unix = int(end.timestamp() * 1e9)
+
+    # call service
+    simulation_response = optimizer_stub.GetMPCSimulation(
+        optimizer_pb2.SimulationRequest(
+            building=building,
+            zones=zones,
+            start=int(start_unix),
+            end=int(end_unix),
+            window=window,
+            forecasting_horizon=forecasting_horizon,
+            lambda_val=lambda_val,
+            starting_temperatures=starting_temperatures,
+            unit=unit,
+            num_runs=num_runs))
+
+
+    actions = []
+    temperatures = []
+    for simulation_result in simulation_response.simulation_results:
+        actions.append({iter_zone: simulation_result.actions[iter_zone] for iter_zone in zones})
+        temperatures.append({iter_zone: simulation_result.temperatures[iter_zone] for iter_zone in zones})
+
+    return actions, temperatures
+
 
 def check_data(data, start, end, window, check_nan=False):
     """Checks if data has right times and optionally checks for nan.
