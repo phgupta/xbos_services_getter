@@ -157,7 +157,7 @@ def get_comfortband(temperature_band_stub, building, zone, start, end, window):
                               unit="F"))
 
     # process data
-    list = []
+    comfortband_list = []
     for msg in comfortband_response.schedules:
         item = {
             "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
@@ -165,8 +165,8 @@ def get_comfortband(temperature_band_stub, building, zone, start, end, window):
             "t_low" : msg.temperature_low,
             "unit" : msg.unit
         }
-        list.append(item)
-    df = pd.DataFrame(list)
+        comfortband_list.append(item)
+    df = pd.DataFrame(comfortband_list)
     df.set_index("datetime",inplace=True)
     return df
 
@@ -196,7 +196,7 @@ def get_do_not_exceed(temperature_band_stub, building, zone, start, end, window)
                               unit="F"))
 
     # process data
-    list = []
+    do_not_exceed_list = []
     for msg in do_not_exceed_response.schedules:
         item = {
             "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
@@ -204,8 +204,8 @@ def get_do_not_exceed(temperature_band_stub, building, zone, start, end, window)
             "t_low" : msg.temperature_low,
             "unit" : msg.unit
         }
-        list.append(item)
-    df = pd.DataFrame(list)
+        do_not_exceed_list.append(item)
+    df = pd.DataFrame(do_not_exceed_list)
     df.set_index("datetime",inplace=True)
     return df
 
@@ -254,14 +254,14 @@ def get_occupancy(occupancy_stub, building, zone, start, end, window):
         occupancy_pb2.Request(building=building, zone=zone, start=int(start_unix), end=int(end_unix), window=window))
 
     # process data
-    list = []
+    occupancy_list = []
     for msg in occupancy_response.occupancies:
         item = {
             "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
             "occupancy" : msg.occupancy
         }
-        list.append(item)
-    df = pd.DataFrame(list)
+        occupancy_list.append(item)
+    df = pd.DataFrame(occupancy_list)
     df.set_index("datetime",inplace=True)
     return df
 
@@ -338,7 +338,7 @@ def get_price_utility_tariff(price_stub,utility,tariff,price_type, start, end, w
                                                        end=end_unix,
                                                        window=window))
     # process data
-    list = []
+    utility_tariff_list = []
     for msg in price_response.prices:
         item = {
             "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
@@ -346,8 +346,8 @@ def get_price_utility_tariff(price_stub,utility,tariff,price_type, start, end, w
             "unit" : msg.unit,
             "window" : msg.window
         }
-        list.append(item)
-    df = pd.DataFrame(list)
+        utility_tariff_list.append(item)
+    df = pd.DataFrame(utility_tariff_list)
     df.set_index("datetime",inplace=True)
     return df
 
@@ -360,7 +360,7 @@ def get_price(price_stub, building, price_type, start, end, window):
     :param start: (datetime timezone aware)
     :param end: (datetime timezone aware)
     :param window: (str) the interval in which to split the data.
-    :return: pd.DataFrame columns=["price" (float), "unit" string] index=start to end with window intervals.
+    :return: pd.DataFrame columns=["price", "unit"], types=[float, string] index=start to end with window intervals.
     """
 
     # call service
@@ -429,7 +429,7 @@ def get_indoor_temperature_historic(indoor_historic_stub, building, zone, start,
     :param start: (datetime timezone aware)
     :param end: (datetime timezone aware)
     :param window: (str) the interval in which to split the data.
-    :return: pd.series valus=float, index=time
+    :return: pd.df columns=["temperature", "unit"] values=[float, string], index=time
 
     """
     start = start.replace(microsecond=0)
@@ -445,19 +445,19 @@ def get_indoor_temperature_historic(indoor_historic_stub, building, zone, start,
                                               window=window,aggregation=agg))
 
     # process data
-    list = []
+    temperature_list = []
     for msg in historic_temperature_response.temperatures:
         item = {
             "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
             "temperature" : msg.temperature,
             "unit" : msg.unit
         }
-        list.append(item)
-    df = pd.DataFrame(list)
+        temperature_list.append(item)
+    df = pd.DataFrame(temperature_list)
     df.set_index("datetime",inplace=True)
     return df
 
-def get_indoor_actions_historic(indoor_historic_stub, building, zone, start, end, window,agg="MAX"):
+def get_indoor_actions_historic(indoor_historic_stub, building, zone, start, end, window, agg="MAX"):
     """Gets historic indoor temperature as pd.series.
 
     :param indoor_historic_stub: grpc stub for historic indoor temperature microservice
@@ -466,7 +466,7 @@ def get_indoor_actions_historic(indoor_historic_stub, building, zone, start, end
     :param start: (datetime timezone aware)
     :param end: (datetime timezone aware)
     :param window: (str) the interval in which to split the data.
-    :return: pd.series valus=float, index=time
+    :return: pd.df columns["action"], types=["float"], index=time
 
     """
     start = start.replace(microsecond=0)
@@ -482,14 +482,14 @@ def get_indoor_actions_historic(indoor_historic_stub, building, zone, start, end
                                               window=window,aggregation=agg))
 
     # process data
-    list = []
+    action_list = []
     for msg in historic_action_response.actions:
         item = {
             "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
             "action" : msg.action
         }
-        list.append(item)
-    df = pd.DataFrame(list)
+        action_list.append(item)
+    df = pd.DataFrame(action_list)
     df.set_index("datetime",inplace=True)
     return df
 
@@ -518,7 +518,7 @@ def get_indoor_setpoints_historic(indoor_historic_stub, building, zone, start, e
                                               window=window,aggregation=agg))
 
     # process data
-    list = []
+    setpoints_list = []
     for msg in historic_setpoints_response.setpoints:
         item = {
             "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
@@ -526,8 +526,8 @@ def get_indoor_setpoints_historic(indoor_historic_stub, building, zone, start, e
             "t_low" : msg.temperature_low,
             "unit" : msg.unit
         }
-        list.append(item)
-    df = pd.DataFrame(list)
+        setpoints_list.append(item)
+    df = pd.DataFrame(setpoints_list)
     df.set_index("datetime",inplace=True)
     return df
 
@@ -698,15 +698,15 @@ def get_outdoor_temperature_historic(outdoor_historic_stub, building, start, end
             building=building, start=int(start_unix), end=int(end_unix), window=window))
 
     # process data
-    list = []
+    temperature_list = []
     for msg in historic_outdoor_response.temperatures:
         item = {
             "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
             "temperature" : msg.temperature,
             "unit" : msg.unit
         }
-        list.append(item)
-    df = pd.DataFrame(list)
+        temperature_list.append(item)
+    df = pd.DataFrame(temperature_list)
     df.set_index("datetime",inplace=True)
     return df
 
@@ -756,15 +756,15 @@ def get_outdoor_temperature_prediction(outdoor_prediction_stub, building, start,
             building=building, start=int(start_unix), end=int(end_unix), window=window))
 
     # process data
-    list = []
+    prediction_list = []
     for msg in prediction_outdoor_response.temperatures:
         item = {
             "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
             "temperature" : msg.temperature,
             "unit" : msg.unit
         }
-        list.append(item)
-    df = pd.DataFrame(list)
+        prediction_list.append(item)
+    df = pd.DataFrame(prediction_list)
     df.set_index("datetime",inplace=True)
     return df
 
@@ -818,14 +818,14 @@ def get_meter_data_historical(meter_data_stub, bldg, start, end, point_type, agg
     historic_meter_data_response = meter_data_stub.GetMeterDataHistorical(request)
 
     # process data
-    list = []
+    meter_list = []
     for msg in historic_meter_data_response.point:
         item = {
             "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
             "power" : msg.power
         }
-        list.append(item)
-    df = pd.DataFrame(list)
+        meter_list.append(item)
+    df = pd.DataFrame(meter_list)
     df.set_index("datetime",inplace=True)
     return df
 
