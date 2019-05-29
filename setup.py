@@ -9,7 +9,7 @@ with open(path.join(this_directory, 'README.md')) as f:
 
 setup(
     name='xbos-services-getter',
-    version='0.0.2dev39',
+    version='0.0.2dev40',
     packages=find_packages(),
     # license='Creative Commons Attribution-Noncommercial-Share Alike license',
     author='Daniel Lengyel',

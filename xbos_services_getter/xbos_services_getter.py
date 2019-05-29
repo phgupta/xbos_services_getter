@@ -158,7 +158,7 @@ def get_comfortband(temperature_band_stub, building, zone, start, end, window):
 
     # process data
     comfortband_list = []
-    for msg in comfortband_response.schedules:
+    for msg in comfortband_response:
         item = {
             "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
             "t_high" : msg.temperature_high,
@@ -197,7 +197,7 @@ def get_do_not_exceed(temperature_band_stub, building, zone, start, end, window)
 
     # process data
     do_not_exceed_list = []
-    for msg in do_not_exceed_response.schedules:
+    for msg in do_not_exceed_response:
         item = {
             "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
             "t_high" : msg.temperature_high,
@@ -255,7 +255,7 @@ def get_occupancy(occupancy_stub, building, zone, start, end, window):
 
     # process data
     occupancy_list = []
-    for msg in occupancy_response.occupancies:
+    for msg in occupancy_response:
         item = {
             "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
             "occupancy" : msg.occupancy
@@ -339,7 +339,7 @@ def get_price_utility_tariff(price_stub,utility,tariff,price_type, start, end, w
                                                        window=window))
     # process data
     utility_tariff_list = []
-    for msg in price_response.prices:
+    for msg in price_response:
         item = {
             "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
             "price" : msg.price,
@@ -446,13 +446,14 @@ def get_indoor_temperature_historic(indoor_historic_stub, building, zone, start,
 
     # process data
     temperature_list = []
-    for msg in historic_temperature_response.temperatures:
+    for msg in historic_temperature_response:
         item = {
             "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
             "temperature" : msg.temperature,
             "unit" : msg.unit
         }
         temperature_list.append(item)
+
     df = pd.DataFrame(temperature_list)
     df.set_index("datetime",inplace=True)
     return df
@@ -483,7 +484,7 @@ def get_indoor_actions_historic(indoor_historic_stub, building, zone, start, end
 
     # process data
     action_list = []
-    for msg in historic_action_response.actions:
+    for msg in historic_action_response:
         item = {
             "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
             "action" : msg.action
@@ -519,7 +520,7 @@ def get_indoor_setpoints_historic(indoor_historic_stub, building, zone, start, e
 
     # process data
     setpoints_list = []
-    for msg in historic_setpoints_response.setpoints:
+    for msg in historic_setpoints_response:
         item = {
             "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
             "t_high" : msg.temperature_high,
@@ -699,7 +700,7 @@ def get_outdoor_temperature_historic(outdoor_historic_stub, building, start, end
 
     # process data
     temperature_list = []
-    for msg in historic_outdoor_response.temperatures:
+    for msg in historic_outdoor_response:
         item = {
             "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
             "temperature" : msg.temperature,
@@ -819,7 +820,7 @@ def get_meter_data_historical(meter_data_stub, bldg, start, end, point_type, agg
 
     # process data
     meter_list = []
-    for msg in historic_meter_data_response.point:
+    for msg in historic_meter_data_response:
         item = {
             "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
             "power" : msg.power
