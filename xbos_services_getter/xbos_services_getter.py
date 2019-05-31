@@ -494,6 +494,43 @@ def get_indoor_actions_historic(indoor_historic_stub, building, zone, start, end
     df.set_index("datetime",inplace=True)
     return df
 
+def get_indoor_modes_historic(indoor_historic_stub, building, zone, start, end, window, agg="MAX"):
+    """Gets historic indoor temperature as pd.series.
+
+    :param indoor_historic_stub: grpc stub for historic indoor temperature microservice
+    :param building: (str) building name
+    :param zone: (str) zone name
+    :param start: (datetime timezone aware)
+    :param end: (datetime timezone aware)
+    :param window: (str) the interval in which to split the data.
+    :return: pd.df columns["mode"], types=["float"], index=time
+
+    """
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
+
+    start_unix = int(start.timestamp() * 1e9)
+    end_unix = int(end.timestamp() * 1e9)
+    window_seconds = get_window_in_sec(window)
+
+    # call service
+    historic_mode_response = indoor_historic_stub.GetRawModes(
+        indoor_data_historical_pb2.Request(building=building, zone=zone, start=start_unix, end=end_unix,
+                                              window=window,aggregation=agg))
+
+    # process data
+    mode_list = []
+    for msg in historic_mode_response:
+        item = {
+            "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
+            "mode" : msg.mode
+        }
+        mode_list.append(item)
+    df = pd.DataFrame(mode_list)
+    df.set_index("datetime",inplace=True)
+    return df
+
+
 def get_indoor_setpoints_historic(indoor_historic_stub, building, zone, start, end, window,agg="MIN"):
     """Gets historic setpoints temperature as pd.df.
 
