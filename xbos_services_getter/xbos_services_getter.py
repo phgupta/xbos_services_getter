@@ -368,6 +368,51 @@ def get_price(price_stub, building, price_type, start, end, window):
     return get_price_utility_tariff(price_stub,tariff_and_utility["utility"],tariff_and_utility["tariff"],price_type, start, end, window)
 
 
+def get_demand_response_forecast_utility(price_stub, utility,timezone=pytz.timezone('US/Pacific')):
+    if utility.upper() not in ["PGE", "SCE"]:
+        raise AttributeError("Given utility type is invalid. Use PGE or SCE.")
+    # call service
+    demand_response = price_stub.GetDemandResponseForecast(price_pb2.DemandResponseRequest(utility=utility)).statuses
+    # process data
+    utility_tariff_list = []
+    for msg in demand_response:
+        item = {
+            "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=timezone),
+            "status" : msg.status
+        }
+        utility_tariff_list.append(item)
+    df = pd.DataFrame(utility_tariff_list)
+    if len(utility_tariff_list)!= 0:
+        df.set_index("datetime",inplace=True)
+    return df
+
+
+def get_demand_response_confirmed_utility(price_stub, utility,timezone=pytz.timezone('US/Pacific')):
+    if utility.upper() not in ["PGE", "SCE"]:
+        raise AttributeError("Given utility type is invalid. Use PGE or SCE.")
+    # call service
+    demand_response = price_stub.GetDemandResponseConfirmed(price_pb2.DemandResponseRequest(utility=utility)).statuses
+    # process data
+    utility_tariff_list = []
+    for msg in demand_response:
+        item = {
+            "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=timezone),
+            "status" : msg.status
+        }
+        utility_tariff_list.append(item)
+
+    df = pd.DataFrame(utility_tariff_list)
+    if len(utility_tariff_list)!= 0:
+        df.set_index("datetime",inplace=True)
+    return df
+
+def get_demand_response_forecast(price_stub, building,timezone=pytz.timezone('US/Pacific')):
+    tariff_and_utility = get_tariff_and_utility(price_stub, building)
+    return get_demand_response_forecast_utility(price_stub,tariff_and_utility["utility"])
+
+def get_demand_response_confirmed(price_stub, building,timezone=pytz.timezone('US/Pacific')):
+    tariff_and_utility = get_tariff_and_utility(price_stub, building)
+    return get_demand_response_confirmed_utility(price_stub,tariff_and_utility["utility"])
 
 # indoor historic functions
 def get_indoor_historic_stub(INDOOR_DATA_HISTORICAL_HOST_ADDRESS=None,secure=True):
