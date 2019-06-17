@@ -726,7 +726,7 @@ def get_outdoor_temperature_historic_stub(OUTDOOR_TEMPERATURE_HISTORICAL_HOST_AD
     return outdoor_temperature_historical_pb2_grpc.OutdoorTemperatureStub(channel)
 
 
-def get_outdoor_temperature_historic(outdoor_historic_stub, building, start, end, window):
+def get_raw_outdoor_temperature_historic(outdoor_historic_stub, building, start, end, window, aggregate="MEAN"):
     """Gets historic outdoor temperature as pd.series.
 
     :param indoor_historic_stub: grpc stub for historic outdoor temperature microservice
@@ -746,7 +746,44 @@ def get_outdoor_temperature_historic(outdoor_historic_stub, building, start, end
     window_seconds = get_window_in_sec(window)
 
     # call service
-    historic_outdoor_response = outdoor_historic_stub.GetTemperature(
+    historic_outdoor_response = outdoor_historic_stub.GetRawTemperature(
+        outdoor_temperature_historical_pb2.TemperatureRequest(
+            building=building, start=int(start_unix), end=int(end_unix), window=window, aggregate=aggregate))
+
+    # process data
+    temperature_list = []
+    for msg in historic_outdoor_response:
+        item = {
+            "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
+            "temperature" : msg.temperature,
+            "unit" : msg.unit
+        }
+        temperature_list.append(item)
+    df = pd.DataFrame(temperature_list)
+    df.set_index("datetime",inplace=True)
+    return df
+
+def get_preprocessed_outdoor_temperature(outdoor_historic_stub, building, start, end, window):
+    """Gets historic outdoor temperature as pd.series.
+
+    :param indoor_historic_stub: grpc stub for historic outdoor temperature microservice
+    :param building: (str) building name
+    :param zone: (str) zone name
+    :param start: (datetime timezone aware)
+    :param end: (datetime timezone aware)
+    :param window: (str) the interval in which to split the data.
+    :return: pd.series valus=float, index=time
+
+    """
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
+
+    start_unix = int(start.timestamp() * 1e9)
+    end_unix = int(end.timestamp() * 1e9)
+    window_seconds = get_window_in_sec(window)
+
+    # call service
+    historic_outdoor_response = outdoor_historic_stub.GetPreprocessedTemperature(
         outdoor_temperature_historical_pb2.TemperatureRequest(
             building=building, start=int(start_unix), end=int(end_unix), window=window))
 
