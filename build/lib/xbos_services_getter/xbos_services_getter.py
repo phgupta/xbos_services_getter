@@ -1,8 +1,6 @@
 import grpc
 from xbos_services_getter.lib import building_zone_names_pb2
 from xbos_services_getter.lib import building_zone_names_pb2_grpc
-from xbos_services_getter.lib import discomfort_pb2
-from xbos_services_getter.lib import discomfort_pb2_grpc
 from xbos_services_getter.lib import hvac_consumption_pb2
 from xbos_services_getter.lib import hvac_consumption_pb2_grpc
 from xbos_services_getter.lib import indoor_data_historical_pb2
@@ -23,6 +21,8 @@ from xbos_services_getter.lib import price_pb2
 from xbos_services_getter.lib import price_pb2_grpc
 from xbos_services_getter.lib import temperature_bands_pb2
 from xbos_services_getter.lib import temperature_bands_pb2_grpc
+from xbos_services_getter.lib import baseline_optimizer_pb2
+from xbos_services_getter.lib import baseline_optimizer_pb2_grpc
 
 import datetime
 import pytz
@@ -368,36 +368,51 @@ def get_price(price_stub, building, price_type, start, end, window):
     return get_price_utility_tariff(price_stub,tariff_and_utility["utility"],tariff_and_utility["tariff"],price_type, start, end, window)
 
 
-# discomfort functions
-def get_discomfort_stub(DISCOMFORT_HOST_ADDRESS=None,secure=True):
-    """Get the stub to interact with the discomfort service.
-
-    :param DISCOMFORT_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
-     set as environment variable.
-    :return: grpc Stub object.
-
-    """
-
-    if DISCOMFORT_HOST_ADDRESS is None:
-        DISCOMFORT_HOST_ADDRESS = os.environ["DISCOMFORT_HOST_ADDRESS"]
-
-    if not secure:
-        channel = grpc.insecure_channel(DISCOMFORT_HOST_ADDRESS)
-    else:
-        credentials = grpc.ssl_channel_credentials()
-        channel = grpc.secure_channel(DISCOMFORT_HOST_ADDRESS, credentials)
-    return discomfort_pb2_grpc.DiscomfortStub(channel)
+def get_demand_response_forecast_utility(price_stub, utility,timezone=pytz.timezone('US/Pacific')):
+    if utility.upper() not in ["PGE", "SCE"]:
+        raise AttributeError("Given utility type is invalid. Use PGE or SCE.")
+    # call service
+    demand_response = price_stub.GetDemandResponseForecast(price_pb2.DemandResponseRequest(utility=utility)).statuses
+    # process data
+    utility_tariff_list = []
+    for msg in demand_response:
+        item = {
+            "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=timezone),
+            "status" : msg.status
+        }
+        utility_tariff_list.append(item)
+    df = pd.DataFrame(utility_tariff_list)
+    if len(utility_tariff_list)!= 0:
+        df.set_index("datetime",inplace=True)
+    return df
 
 
-def get_discomfort(discomfort_stub, building, temperature, temperature_low, temperature_high, occupancy):
-    discomfort_response = discomfort_stub.GetLinearDiscomfort(discomfort_pb2.Request(building=building,
-                                                                                    temperature=temperature,
-                                                                                    temperature_low=temperature_low,
-                                                                                    temperature_high=temperature_high,
-                                                                                    unit="F",
-                                                                                    occupancy=occupancy))
-    return discomfort_response.cost
+def get_demand_response_confirmed_utility(price_stub, utility,timezone=pytz.timezone('US/Pacific')):
+    if utility.upper() not in ["PGE", "SCE"]:
+        raise AttributeError("Given utility type is invalid. Use PGE or SCE.")
+    # call service
+    demand_response = price_stub.GetDemandResponseConfirmed(price_pb2.DemandResponseRequest(utility=utility)).statuses
+    # process data
+    utility_tariff_list = []
+    for msg in demand_response:
+        item = {
+            "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=timezone),
+            "status" : msg.status
+        }
+        utility_tariff_list.append(item)
 
+    df = pd.DataFrame(utility_tariff_list)
+    if len(utility_tariff_list)!= 0:
+        df.set_index("datetime",inplace=True)
+    return df
+
+def get_demand_response_forecast(price_stub, building,timezone=pytz.timezone('US/Pacific')):
+    tariff_and_utility = get_tariff_and_utility(price_stub, building)
+    return get_demand_response_forecast_utility(price_stub,tariff_and_utility["utility"])
+
+def get_demand_response_confirmed(price_stub, building,timezone=pytz.timezone('US/Pacific')):
+    tariff_and_utility = get_tariff_and_utility(price_stub, building)
+    return get_demand_response_confirmed_utility(price_stub,tariff_and_utility["utility"])
 
 # indoor historic functions
 def get_indoor_historic_stub(INDOOR_DATA_HISTORICAL_HOST_ADDRESS=None,secure=True):
@@ -493,6 +508,43 @@ def get_indoor_actions_historic(indoor_historic_stub, building, zone, start, end
     df = pd.DataFrame(action_list)
     df.set_index("datetime",inplace=True)
     return df
+
+def get_indoor_modes_historic(indoor_historic_stub, building, zone, start, end, window, agg="MAX"):
+    """Gets historic indoor temperature as pd.series.
+
+    :param indoor_historic_stub: grpc stub for historic indoor temperature microservice
+    :param building: (str) building name
+    :param zone: (str) zone name
+    :param start: (datetime timezone aware)
+    :param end: (datetime timezone aware)
+    :param window: (str) the interval in which to split the data.
+    :return: pd.df columns["mode"], types=["float"], index=time
+
+    """
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
+
+    start_unix = int(start.timestamp() * 1e9)
+    end_unix = int(end.timestamp() * 1e9)
+    window_seconds = get_window_in_sec(window)
+
+    # call service
+    historic_mode_response = indoor_historic_stub.GetRawModes(
+        indoor_data_historical_pb2.Request(building=building, zone=zone, start=start_unix, end=end_unix,
+                                              window=window,aggregation=agg))
+
+    # process data
+    mode_list = []
+    for msg in historic_mode_response:
+        item = {
+            "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
+            "mode" : msg.mode
+        }
+        mode_list.append(item)
+    df = pd.DataFrame(mode_list)
+    df.set_index("datetime",inplace=True)
+    return df
+
 
 def get_indoor_setpoints_historic(indoor_historic_stub, building, zone, start, end, window,agg="MIN"):
     """Gets historic setpoints temperature as pd.df.
@@ -674,7 +726,7 @@ def get_outdoor_temperature_historic_stub(OUTDOOR_TEMPERATURE_HISTORICAL_HOST_AD
     return outdoor_temperature_historical_pb2_grpc.OutdoorTemperatureStub(channel)
 
 
-def get_outdoor_temperature_historic(outdoor_historic_stub, building, start, end, window):
+def get_raw_outdoor_temperature_historic(outdoor_historic_stub, building, start, end, window, aggregate="MEAN"):
     """Gets historic outdoor temperature as pd.series.
 
     :param indoor_historic_stub: grpc stub for historic outdoor temperature microservice
@@ -694,7 +746,44 @@ def get_outdoor_temperature_historic(outdoor_historic_stub, building, start, end
     window_seconds = get_window_in_sec(window)
 
     # call service
-    historic_outdoor_response = outdoor_historic_stub.GetTemperature(
+    historic_outdoor_response = outdoor_historic_stub.GetRawTemperature(
+        outdoor_temperature_historical_pb2.TemperatureRequest(
+            building=building, start=int(start_unix), end=int(end_unix), window=window, aggregate=aggregate))
+
+    # process data
+    temperature_list = []
+    for msg in historic_outdoor_response:
+        item = {
+            "datetime" : datetime.datetime.utcfromtimestamp(msg.time / 1e9).replace(tzinfo=pytz.utc).astimezone(tz=start.tzinfo),
+            "temperature" : msg.temperature,
+            "unit" : msg.unit
+        }
+        temperature_list.append(item)
+    df = pd.DataFrame(temperature_list)
+    df.set_index("datetime",inplace=True)
+    return df
+
+def get_preprocessed_outdoor_temperature(outdoor_historic_stub, building, start, end, window):
+    """Gets historic outdoor temperature as pd.series.
+
+    :param indoor_historic_stub: grpc stub for historic outdoor temperature microservice
+    :param building: (str) building name
+    :param zone: (str) zone name
+    :param start: (datetime timezone aware)
+    :param end: (datetime timezone aware)
+    :param window: (str) the interval in which to split the data.
+    :return: pd.series valus=float, index=time
+
+    """
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
+
+    start_unix = int(start.timestamp() * 1e9)
+    end_unix = int(end.timestamp() * 1e9)
+    window_seconds = get_window_in_sec(window)
+
+    # call service
+    historic_outdoor_response = outdoor_historic_stub.GetPreprocessedTemperature(
         outdoor_temperature_historical_pb2.TemperatureRequest(
             building=building, start=int(start_unix), end=int(end_unix), window=window))
 
@@ -966,3 +1055,50 @@ def check_data(data, start, end, window, check_nan=False):
     if check_nan and (data.isna().values.any()):
         return "Nan values in data."
     return None
+
+def get_baseline_optimizer_stub(BASELINE_OPTIMIZER_HOST_ADDRESS=None,secure=True):
+    """ Get stub to interact with optimizer service.
+    :param BASELINE_OPTIMIZER_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
+        set as environment variable.
+    :return: grpc Stub object.
+    """
+
+    if BASELINE_OPTIMIZER_HOST_ADDRESS is None:
+        BASELINE_OPTIMIZER_HOST_ADDRESS = os.environ["BASELINE_OPTIMIZER_HOST_ADDRESS"]
+
+    if not secure:
+        channel = grpc.insecure_channel(BASELINE_OPTIMIZER_HOST_ADDRESS)
+    else:
+        credentials = grpc.ssl_channel_credentials()
+        channel = grpc.secure_channel(BASELINE_OPTIMIZER_HOST_ADDRESS,credentials)
+    return baseline_optimizer_pb2_grpc.BaselineOptimizerStub(channel)
+
+def get_normal_schedule_action(baseline_optimizer_stub,building,zones,start,end,window,starting_temperatures,unit,occupancy,do_not_exceed):
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
+
+    start_unix = int(start.timestamp() * 1e9)
+    end_unix = int(end.timestamp() * 1e9)
+
+    baseline_optimizer_response = baseline_optimizer_stub.GetNormalScheduleAction(baseline_optimizer_pb2.NormalScheduleRequest(building=building,zones=zones,start=start_unix,end=end_unix,window=window,starting_temperatures=starting_temperatures,unit=unit,occupancy=occupancy,do_not_exceed=do_not_exceed))
+    return baseline_optimizer_response.actions
+
+def get_setpoint_expansion_action(baseline_optimizer_stub,building,zones,start,end,window,starting_temperatures,unit,occupancy,do_not_exceed,expansion_degrees):
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
+
+    start_unix = int(start.timestamp() * 1e9)
+    end_unix = int(end.timestamp() * 1e9)
+
+    baseline_optimizer_response = baseline_optimizer_stub.GetSetpointExpansionAction(baseline_optimizer_pb2.SetpointExpansionRequest(building=building,zones=zones,start=start_unix,end=end_unix,window=window,starting_temperatures=starting_temperatures,unit=unit,occupancy=occupancy,do_not_exceed=do_not_exceed,expansion_degrees=expansion_degrees))
+    return baseline_optimizer_response.actions
+
+def get_demand_charge_action(baseline_optimizer_stub,building,zones,start,end,window,starting_temperatures,unit,occupancy,do_not_exceed,max_zones,include_all_zones):
+    start = start.replace(microsecond=0)
+    end = end.replace(microsecond=0)
+
+    start_unix = int(start.timestamp() * 1e9)
+    end_unix = int(end.timestamp() * 1e9)
+
+    baseline_optimizer_response = baseline_optimizer_stub.GetDemandChargeAction(baseline_optimizer_pb2.DemandChargeRequest(building=building,zones=zones,start=start_unix,end=end_unix,window=window,starting_temperatures=starting_temperatures,unit=unit,occupancy=occupancy,do_not_exceed=do_not_exceed,max_zones=max_zones,include_all_zones=include_all_zones))
+    return baseline_optimizer_response.actions
