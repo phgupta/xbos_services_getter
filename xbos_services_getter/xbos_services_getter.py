@@ -9,6 +9,8 @@ from xbos_services_getter.lib import indoor_temperature_prediction_pb2
 from xbos_services_getter.lib import indoor_temperature_prediction_pb2_grpc
 from xbos_services_getter.lib import meter_data_historical_pb2
 from xbos_services_getter.lib import meter_data_historical_pb2_grpc
+from xbos_services_getter.lib import skyspark_pb2
+from xbos_services_getter.lib import skyspark_pb2_grpc
 from xbos_services_getter.lib import occupancy_pb2
 from xbos_services_getter.lib import occupancy_pb2_grpc
 from xbos_services_getter.lib import optimizer_pb2
@@ -917,6 +919,45 @@ def get_meter_data_historical(meter_data_stub, bldg, start, end, point_type, agg
         meter_list.append(item)
     df = pd.DataFrame(meter_list)
     df.set_index("datetime",inplace=True)
+    return df
+
+
+def get_skyspark_stub(SKYSPARK_HOST_ADDRESS=None, secure=True):
+    """ Get stub to interact with skyspark data.
+    :param SKYSPARK_HOST_ADDRESS: Optional argument to supply host address for given service. Otherwise,
+        set as environment variable.
+    :return: grpc Stub object.
+    """
+
+    if SKYSPARK_HOST_ADDRESS is None:
+        SKYSPARK_HOST_ADDRESS = os.environ["SKYSPARK_HOST_ADDRESS"]
+
+    if not secure:
+        channel = grpc.insecure_channel(SKYSPARK_HOST_ADDRESS)
+    else:
+        credentials = grpc.ssl_channel_credentials()
+        channel = grpc.secure_channel(SKYSPARK_HOST_ADDRESS, credentials)
+    return skyspark_pb2_grpc.skysparkStub(channel)
+
+
+def get_data_from_skyspark(skyspark_stub, query)
+    """ Get skyspark data as a dataframe.
+    
+    :param skyspark_stub: grpc stub for skyspark data service
+    :param query: (str) query for skyspark
+    :return: pd.DataFrame() - skyspark data
+    """
+
+    request = skyspark_pb2.Request(query=query)
+
+    skyspark_data_response = skyspark_stub.GetDataFromSkyspark(request)
+
+    # Convert response object into pd.DataFrame()
+    df = pd.DataFrame()
+    for point in skyspark_data_response.data:
+        df = df.append([[point.time, point.value]])
+    df.columns = ['datetime', 'power']
+    df.set_index('datetime', inplace=True)
     return df
 
 
