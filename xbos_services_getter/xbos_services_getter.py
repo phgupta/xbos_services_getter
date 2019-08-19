@@ -940,7 +940,7 @@ def get_skyspark_stub(SKYSPARK_HOST_ADDRESS=None, secure=True):
     return skyspark_pb2_grpc.skysparkStub(channel)
 
 
-def get_data_from_skyspark(skyspark_stub, query)
+def get_data_from_skyspark(skyspark_stub, query):
     """ Get skyspark data as a dataframe.
     
     :param skyspark_stub: grpc stub for skyspark data service
