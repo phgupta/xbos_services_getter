@@ -955,7 +955,7 @@ def get_data_from_skyspark(skyspark_stub, query):
     # Convert response object into pd.DataFrame()
     df = pd.DataFrame()
     for point in skyspark_data_response.data:
-        df = df.append([[point.time, point.value]])
+       df = df.append([[datetime.datetime.strptime(point.time, '%Y-%m-%dT%H:%M:%S%z'), point.value]])
     df.columns = ['datetime', 'power']
     df.set_index('datetime', inplace=True)
     return df
